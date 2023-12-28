@@ -1,7 +1,5 @@
-
-
 import { Box, Text, Stack, Image, ColorProps } from "@chakra-ui/react";
-import { AttachmentIcon } from '@chakra-ui/icons'
+import { AttachmentIcon } from "@chakra-ui/icons";
 
 export interface fileType {
     path: string;
@@ -11,18 +9,148 @@ export interface fileType {
     data: string;
 }
 
-/**
- * File uploader component
- *
- * @param maxSize The maximum size in bytes of a file to be uploaded
- * @param fileType The type of a file to be uploaded
- * @param primaryColor Primary component color
- * @param secondaryColor Secondary component color
- * @param backgroundColor Background color
- * @param showOver Show opacity when dragging file over the component
- * @param onUploadStart A function called before processing the files uploaded
- * @param onUploadEnd A function called after processing the files uploaded
- */
+export type FileTypeProp =
+    | "image"
+    | "video"
+    | "audio"
+    | "text"
+    | "pdf"
+    | "markdown"
+    | "other";
+
+const fileTypeText = (fileType: FileTypeProp): string => {
+    const map: { [key in FileTypeProp]: string } = {
+        image: "Image files",
+        video: "Video files",
+        audio: "Audio files",
+        text: "Text files",
+        pdf: "Pdf files",
+        markdown: "Markdown files",
+        other: "Other files",
+    };
+    return map[fileType];
+};
+
+async function getAllFileEntries(
+    dataTransferItemList: DataTransferItemList,
+    maxSize: number,
+    fileType: FileTypeProp,
+): Promise<fileType[]> {
+    let fileEntries: fileType[] = [];
+    let queue = [];
+
+    for (let i = 0; i < dataTransferItemList.length; i++) {
+        // Note webkitGetAsEntry a non-standard feature and may change
+        // Usage is necessary for handling directories
+        queue.push(dataTransferItemList[i].webkitGetAsEntry());
+    }
+
+    while (queue.length > 0) {
+        let entry = queue.shift();
+
+        if (entry && entry.isFile) {
+            // This is a file
+            await new Promise((resolve, reject) => {
+                // Read file data and save to base64
+                (entry as FileSystemFileEntry).file((file) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+
+                    reader.onload = () => {
+                        // Do all the checks
+                        if (
+                            (maxSize == -1 || file.size < maxSize) &&
+                            (file.type.split("/")[0] == fileType ||
+                                (file.type == "application/pdf" &&
+                                    fileType == "pdf") ||
+                                fileType == "other")
+                        ) {
+                            fileEntries.push({
+                                path: (
+                                    entry as FileSystemFileEntry
+                                ).fullPath.replace(
+                                    (entry as FileSystemFileEntry).name,
+                                    "",
+                                ),
+                                type: "file",
+                                name: file.name,
+                                mimeType:
+                                    file.type || "application/octet-stream",
+                                data: reader.result?.toString() || "",
+                            });
+                        }
+                        resolve(0);
+                    };
+
+                    reader.onerror = reject;
+                });
+            });
+        } else if (entry && entry.isDirectory) {
+            // This is a folder
+            fileEntries.push({
+                path: entry.fullPath.replace(entry.name, ""),
+                type: "folder",
+                name: (entry as FileSystemDirectoryEntry).name,
+                mimeType: "folder/folder",
+                data: "",
+            });
+
+            let reader = (entry as FileSystemDirectoryEntry).createReader();
+            queue.push(...(await readAllDirectoryEntries(reader)));
+        }
+    }
+
+    return fileEntries;
+}
+
+// Get all the entries (files or sub-directories) in a directory by calling readEntries until it returns empty array
+async function readAllDirectoryEntries(
+    directoryReader: FileSystemDirectoryReader,
+) {
+    let entries = [];
+    let readEntries: any = await readEntriesPromise(directoryReader);
+
+    while (readEntries.length > 0) {
+        entries.push(...readEntries);
+        readEntries = await readEntriesPromise(directoryReader);
+    }
+
+    return entries;
+}
+
+// Wrap readEntries in a promise to make working with readEntries easier
+async function readEntriesPromise(directoryReader: FileSystemDirectoryReader) {
+    try {
+        return await new Promise((resolve, reject) => {
+            directoryReader.readEntries(resolve, reject);
+        });
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+function formatFileSize(bytes: number) {
+    if (bytes >= 1000000000000) {
+        return (bytes / 100000000000).toFixed(1) + " TB";
+    }
+    if (bytes >= 1000000000) {
+        return (bytes / 100000000).toFixed(1) + " GB";
+    }
+    if (bytes >= 1000000) {
+        return (bytes / 1000000).toFixed(1) + " MB";
+    }
+    if (bytes >= 1000) {
+        return (bytes / 1000).toFixed(1) + " KB";
+    }
+    if (bytes > 1) {
+        return bytes + " bytes";
+    }
+    if (bytes == 1) {
+        return bytes + " byte";
+    }
+    return "0 GB";
+}
+
 export default function FileUploader({
     maxSize = 10 * 1000000,
     fileType = "other",
@@ -34,7 +162,7 @@ export default function FileUploader({
     onUploadEnd,
 }: {
     maxSize?: number;
-    fileType?: "image" | "video" | "audio" | "text" | "pdf" | "markdown" | "other";
+    fileType?: FileTypeProp;
     primaryColor?: ColorProps["color"];
     secondaryColor?: ColorProps["color"];
     backgroundColor?: ColorProps["color"];
@@ -42,130 +170,6 @@ export default function FileUploader({
     onUploadStart: () => void;
     onUploadEnd: (files: fileType[]) => void;
 }) {
-    // Drop handler function to get all files
-    async function getAllFileEntries(
-        dataTransferItemList: DataTransferItemList,
-    ): Promise<fileType[]> {
-        let fileEntries: fileType[] = [];
-
-        // Use BFS to traverse entire directory/file structure
-        let queue = [];
-
-        // Unfortunately dataTransferItemList is not iterable i.e. no forEach
-        for (let i = 0; i < dataTransferItemList.length; i++) {
-            // Note webkitGetAsEntry a non-standard feature and may change
-            // Usage is necessary for handling directories
-            queue.push(dataTransferItemList[i].webkitGetAsEntry());
-        }
-
-        // Process files while the queue is empty
-        while (queue.length > 0) {
-            let entry = queue.shift();
-
-            if (entry && entry.isFile) {
-                // This is a file
-                await new Promise((resolve, reject) => {
-                    // Read file data and save to base64
-                    (entry as FileSystemFileEntry).file((file) => {
-                        const reader = new FileReader();
-                        reader.readAsDataURL(file);
-
-                        reader.onload = () => {
-                            // Do all the checks
-                            if (
-                                (maxSize == -1 || file.size < maxSize) &&
-                                (file.type.split("/")[0] == fileType ||
-                                    (file.type == "application/pdf" &&
-                                        fileType == "pdf") ||
-                                    fileType == "other")
-                            ) {
-                                fileEntries.push({
-                                    path: (
-                                        entry as FileSystemFileEntry
-                                    ).fullPath.replace(
-                                        (entry as FileSystemFileEntry).name,
-                                        "",
-                                    ),
-                                    type: "file",
-                                    name: file.name,
-                                    mimeType:
-                                        file.type || "application/octet-stream",
-                                    data: reader.result?.toString() || "",
-                                });
-                            }
-                            resolve(0);
-                        };
-
-                        reader.onerror = reject;
-                    });
-                });
-            } else if (entry && entry.isDirectory) {
-                // This is a folder
-                fileEntries.push({
-                    path: entry.fullPath.replace(entry.name, ""),
-                    type: "folder",
-                    name: (entry as FileSystemDirectoryEntry).name,
-                    mimeType: "folder/folder",
-                    data: "",
-                });
-
-                let reader = (entry as FileSystemDirectoryEntry).createReader();
-                queue.push(...(await readAllDirectoryEntries(reader)));
-            }
-        }
-
-        return fileEntries;
-    }
-
-    // Get all the entries (files or sub-directories) in a directory by calling readEntries until it returns empty array
-    async function readAllDirectoryEntries(
-        directoryReader: FileSystemDirectoryReader,
-    ) {
-        let entries = [];
-        let readEntries: any = await readEntriesPromise(directoryReader);
-
-        while (readEntries.length > 0) {
-            entries.push(...readEntries);
-            readEntries = await readEntriesPromise(directoryReader);
-        }
-
-        return entries;
-    }
-
-    // Wrap readEntries in a promise to make working with readEntries easier
-    async function readEntriesPromise(
-        directoryReader: FileSystemDirectoryReader,
-    ) {
-        try {
-            return await new Promise((resolve, reject) => {
-                directoryReader.readEntries(resolve, reject);
-            });
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
-    // Format the file size of a file from bytes to a better readable format
-    function formatFileSize(bytes: any) {
-        if (bytes >= 1000000000000) {
-            bytes = (bytes / 100000000000).toFixed(1) + " TB";
-        } else if (bytes >= 1000000000) {
-            bytes = (bytes / 100000000).toFixed(1) + " GB";
-        } else if (bytes >= 1000000) {
-            bytes = (bytes / 1000000).toFixed(1) + " MB";
-        } else if (bytes >= 1000) {
-            bytes = (bytes / 1000).toFixed(1) + " KB";
-        } else if (bytes > 1) {
-            bytes = bytes + " bytes";
-        } else if (bytes == 1) {
-            bytes = bytes + " byte";
-        } else {
-            bytes = "0 GB";
-        }
-
-        return bytes;
-    }
-
     // The main render of the component
     return (
         <Stack
@@ -205,7 +209,7 @@ export default function FileUploader({
                     onUploadStart();
 
                     // Process the files
-                    let items = await getAllFileEntries(e.dataTransfer.items);
+                    let items = await getAllFileEntries(e.dataTransfer.items, maxSize, fileType);
 
                     // Call this after the processing of the file is finished
                     onUploadEnd(items);
@@ -325,21 +329,7 @@ export default function FileUploader({
                     <Text display="inline">or drag and drop</Text>
                 </Box>
                 <Text fontSize="xs">
-                    {fileType == "markdown"
-                        ? "Markdown file"
-                    : fileType == "audio"
-                        ? "Audio files"
-                        : fileType == "image"
-                          ? "Image files"
-                          : fileType == "video"
-                            ? "Video files"
-                            : fileType == "text"
-                              ? "Text files"
-                              : fileType == "pdf"
-                                ? "PDF files"
-                                : fileType == "other"
-                                  ? "Any type of file"
-                                  : ""}{" "}
+                    {fileTypeText(fileType)}
                     {maxSize != -1
                         ? "up to " + formatFileSize(maxSize)
                         : "up to unlimited GBs"}

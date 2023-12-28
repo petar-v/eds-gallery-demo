@@ -1,9 +1,10 @@
-// "use client";
-
 import { Metadata } from "next";
 
-import { Box, Heading, Flex, Container, Spacer } from "@chakra-ui/react";
+import { Box, Heading, Flex } from "@chakra-ui/react";
 import FileUploadDialog from "./fileUploadDialog";
+
+import { writeFile } from 'fs/promises';
+import { join } from 'path';
 
 export const metadata: Metadata = {
     title: "Upload a new EDS Book",
@@ -25,13 +26,7 @@ export default function Page() {
                 <Heading mb={6} h={10}>
                     Upload a Jupyter Notebook
                 </Heading>
-                <Box
-                    maxW="lg"
-                    w="full"
-                    bg="white"
-                    boxShadow="lg"
-                    rounded="md"
-                >
+                <Box maxW="lg" w="full" bg="white" boxShadow="lg" rounded="md">
                     <FileUploadDialog />
                 </Box>
             </Flex>
