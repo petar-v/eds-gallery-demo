@@ -30,9 +30,15 @@
         ]
     },
     "dependencies": {
+        "@chakra-ui/icons": "^2.1.1",
+        "@chakra-ui/next-js": "^2.2.0",
+        "@chakra-ui/react": "^2.8.2",
+        "@emotion/react": "^11.11.3",
+        "@emotion/styled": "^11.11.0",
         "@reduxjs/toolkit": "^2.0.1",
         "autoprefixer": "^10.4.16",
         "bootstrap": "^5.3.2",
+        "framer-motion": "^10.16.16",
         "install": "^0.13.0",
         "iron-session": "^8.0.1",
         "next": "^14.0.4",
