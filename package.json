@@ -1,0 +1,75 @@
+{
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint",
+        "cf-deploy": "npx @cloudflare/next-on-pages@1",
+        "run-password-page": "npx wrangler pages dev build -b CFP_PASSWORD=test",
+        "eslint": "eslint '**/*.{js,ts,jsx,tsx,cjs,mjs,astro}' --fix",
+        "stylelint": "stylelint '**/*.{css,scss,js,ts}'",
+        "prettify": "prettier  --ignore-unknown --write .",
+        "prettify:check": "prettier --check --ignore-unknown .",
+        "prepare": "husky install",
+        "precommit": "lint-staged"
+    },
+    "lint-staged": {
+        "**/*.{jsx,tsx,js,ts,cjs,mjs}": [
+            "prettier --write",
+            "eslint --fix"
+        ],
+        "**/*.{scss,css}": [
+            "prettier --write",
+            "stylelint"
+        ],
+        "**/*.{mdx}": [
+            "prettier --write",
+            "eslint --fix"
+        ]
+    },
+    "dependencies": {
+        "@reduxjs/toolkit": "^2.0.1",
+        "autoprefixer": "^10.4.16",
+        "bootstrap": "^5.3.2",
+        "install": "^0.13.0",
+        "iron-session": "^8.0.1",
+        "next": "^14.0.4",
+        "next-redux-wrapper": "^8.1.0",
+        "react": "^18.2.0",
+        "react-bootstrap": "^2.9.2",
+        "react-dom": "^18.2.0",
+        "react-markdown": "^9.0.1",
+        "react-redux": "^9.0.4",
+        "tailwindcss": "^3.4.0",
+        "zod": "^3.22.2"
+    },
+    "devDependencies": {
+        "@cloudflare/next-on-pages": "^1.8.2",
+        "@types/node": "^20.10.5",
+        "@types/react": "^18.2.46",
+        "@types/react-dom": "^18.2.18",
+        "eslint": "^8.56.0",
+        "eslint-config-next": "14.0.4",
+        "file-loader": "^6.2.0",
+        "husky": "^8.0.3",
+        "lint-staged": "^15.2.0",
+        "postcss": "^8.4.32",
+        "postcss-html": "^1.5.0",
+        "prettier": "^3.1.1",
+        "raw-loader": "^4.0.2",
+        "sass": "^1.69.5",
+        "stylelint": "^16.1.0",
+        "stylelint-config-html": "^1.1.0",
+        "stylelint-config-recommended-scss": "^14.0.0",
+        "stylelint-config-standard": "^36.0.0",
+        "stylelint-config-standard-scss": "^12.0.0",
+        "stylelint-prettier": "^5.0.0",
+        "typescript": "^5.3.3",
+        "vercel": "^33.0.1",
+        "webpack": "^5.89.0",
+        "wrangler": "^3.22.1"
+    },
+    "packageManager": "yarn@4.0.1"
+}
