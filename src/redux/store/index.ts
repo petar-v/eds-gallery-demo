@@ -1,9 +1,10 @@
 import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
 import { createWrapper, HYDRATE } from "next-redux-wrapper";
 import { combineReducers } from "@reduxjs/toolkit";
+import exampleSlice from "./exampleSlice";
 
 const combinedReducer = combineReducers({
-    slice: {},
+    example: exampleSlice,
 });
 
 const extraThunkArg = {};

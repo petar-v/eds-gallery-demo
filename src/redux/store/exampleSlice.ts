@@ -27,6 +27,6 @@ export const setGreeting = createAsyncThunk<void, string, ThunkApi>(
 );
 
 export const selectGreetingState = (state: AppState) =>
-    state[exampleSlice.name].backend;
+    state[exampleSlice.name].greeting;
 
 export default exampleSlice.reducer;
