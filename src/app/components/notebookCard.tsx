@@ -1,7 +1,36 @@
-import { Heading, CardHeader, Stack, Card, Badge } from "@chakra-ui/react";
+import { Heading, CardHeader, Card, Badge, Flex } from "@chakra-ui/react";
 
 import Notebook from "@/definitions/Notebook";
 import { CardFooter } from "react-bootstrap";
+
+const colors = [
+    "gray",
+    "red",
+    "orange",
+    "yellow",
+    "green",
+    "teal",
+    "blue",
+    "cyan",
+    "purple",
+    "pink",
+    "linkedin",
+    "facebook",
+    "messenger",
+    "whatsapp",
+    "twitter",
+    "telegram",
+];
+
+const ColorfulBadge = ({ tag }: { tag: string }) => {
+    const hashString = tag
+        .split("")
+        .map((char) => char.charCodeAt(0))
+        .reduce((a, b) => a + b, 0);
+
+    const color = colors[hashString % colors.length];
+    return <Badge colorScheme={color}>{tag}</Badge>;
+};
 
 export default function NotebookCard({
     notebook,
@@ -21,11 +50,11 @@ export default function NotebookCard({
                 <Heading size="md">{notebook.title}</Heading>
             </CardHeader>
             <CardFooter>
-                <Stack direction="row">
+                <Flex direction="row" p={3} gap={2} wrap="wrap">
                     {notebook.tags.map((tag, i) => (
-                        <Badge key={`tag-${i}`}>tag</Badge>
+                        <ColorfulBadge key={`tag-${i}`} tag={tag} />
                     ))}
-                </Stack>
+                </Flex>
             </CardFooter>
         </Card>
     );

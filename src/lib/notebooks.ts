@@ -2,7 +2,6 @@ import { parse } from "marked";
 import { load } from "cheerio";
 import atob from "atob";
 
-
 import Notebook from "@/definitions/Notebook";
 
 interface Cell {
@@ -23,14 +22,17 @@ const toString = (data: string | ArrayBuffer): string => {
     return data;
 };
 
+const decode = (data: string | ArrayBuffer): string => {
+    const dataString = toString(data);
+
+    const base64String = dataString.split(";base64,").pop();
+    return atob(base64String || "");
+};
+
 export const parseNotebook = async (
     data: string | ArrayBuffer,
 ): Promise<Notebook> => {
-    const dataString = toString(data);
-
-    const base64String = dataString.split(';base64,').pop();
-    const decoded = atob(base64String || "");
-
+    const decoded = decode(data);
     const json = JSON.parse(decoded) as Ipynb;
     const firstCell = json.cells
         .find((cell) => cell.cell_type === "markdown")
@@ -41,14 +43,17 @@ export const parseNotebook = async (
     const $ = load(htmlString);
 
     const title = $("h1:first").text();
-    const tags = $("p:first code").toArray().map(tag => $(tag).text().trim()).filter(tag => tag !== "tag");
+    const tags = $("p:first code")
+        .toArray()
+        .map((tag) => $(tag).text().trim())
+        .filter((tag) => tag !== "tag");
     console.log(title, tags);
-    
+
     const nb = {
         title,
         tags,
         data: decoded,
     };
-    
+
     return nb;
 };

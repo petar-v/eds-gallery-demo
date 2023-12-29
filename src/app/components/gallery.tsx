@@ -55,10 +55,10 @@ export default function Gallery({ notebooks }: { notebooks: Notebook[] }) {
                 boxShadow="lg"
                 rounded="md"
             ></Box>
-            <p>Books: {notebooks.length}</p>
+            <p>Number of Notebooks: {notebooks.length}</p>
             <SimpleGrid
                 spacing={4}
-                templateColumns="repeat(auto-fill, minmax(300px, 1fr))"
+                templateColumns="repeat(auto-fill, minmax(200px, 1fr))"
             >
                 {notebooks.map((book, i) => (
                     <NotebookCard

@@ -44,6 +44,7 @@
         "install": "^0.13.0",
         "iron-session": "^8.0.1",
         "marked": "^11.1.0",
+        "md5": "^2.3.0",
         "next": "^14.0.4",
         "next-redux-wrapper": "^8.1.0",
         "react": "^18.2.0",
@@ -57,6 +58,7 @@
     "devDependencies": {
         "@cloudflare/next-on-pages": "^1.8.2",
         "@types/atob": "^2.1.4",
+        "@types/md5": "^2.3.5",
         "@types/node": "^20.10.5",
         "@types/react": "^18.2.46",
         "@types/react-dom": "^18.2.18",
