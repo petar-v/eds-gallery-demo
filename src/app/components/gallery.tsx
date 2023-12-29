@@ -8,7 +8,7 @@ import {
     Input,
     InputLeftElement,
     InputGroup,
-    SimpleGrid
+    SimpleGrid,
 } from "@chakra-ui/react";
 import { Search2Icon } from "@chakra-ui/icons";
 
@@ -56,12 +56,19 @@ export default function Gallery({ notebooks }: { notebooks: Notebook[] }) {
                 rounded="md"
             ></Box>
             <p>Books: {notebooks.length}</p>
-            <SimpleGrid spacing={4} templateColumns='repeat(auto-fill, minmax(300px, 1fr))'>
-            {notebooks.map((book, i) => (
-                <NotebookCard notebook={book} key={`notebook-${i}`} onClick={(notebook) => {
-                    alert("open " + notebook.title);
-                }}/>
-            ))}
+            <SimpleGrid
+                spacing={4}
+                templateColumns="repeat(auto-fill, minmax(300px, 1fr))"
+            >
+                {notebooks.map((book, i) => (
+                    <NotebookCard
+                        notebook={book}
+                        key={`notebook-${i}`}
+                        onClick={(notebook) => {
+                            alert("open " + notebook.title);
+                        }}
+                    />
+                ))}
             </SimpleGrid>
         </VStack>
     );
