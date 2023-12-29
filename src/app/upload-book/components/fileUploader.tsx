@@ -1,4 +1,4 @@
-import { Box, Text, Stack, Image, ColorProps } from "@chakra-ui/react";
+import { Box, Text, Stack, ColorProps } from "@chakra-ui/react";
 import { AttachmentIcon } from "@chakra-ui/icons";
 import { FileType } from "@/definitions/FileType";
 

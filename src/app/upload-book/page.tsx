@@ -5,6 +5,7 @@ import FileUploadDialog from "./fileUploadDialog";
 
 import { FileType } from "@/definitions/FileType";
 import { addNotebook } from "@/lib/storage";
+import { parseNotebook } from "@/lib/notebooks";
 
 export const metadata: Metadata = {
     title: "Upload a new EDS Book",
@@ -17,12 +18,18 @@ export default function Page() {
     async function upload(files: FileType[]) {
         "use server";
         console.log(files.map((file) => file.name));
-        files.filter(file => file.data !== null).forEach((file) => { 
-            addNotebook({
-                title: file.name,
-                data: file.data || ""
+
+        // TODO: add in parallel
+        files
+            .filter((file) => file.data !== null)
+            .forEach(async (file) => {
+                try {
+                    const notebook = await parseNotebook(file.data || "");
+                    await addNotebook(notebook);
+                } catch (err) {
+                    // console.error("Failed to parse notebook " + file.name, err);
+                }
             });
-        });
         // TODO: error handling
         return { success: true };
     }

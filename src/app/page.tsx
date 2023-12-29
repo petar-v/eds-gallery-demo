@@ -1,18 +1,15 @@
-"use client"; // TODO: use server components
+import { getNotebooks } from "@/lib/storage";
 
-import { Link } from "@chakra-ui/next-js";
+import Gallery from "./components/gallery";
+import { Suspense } from "react";
 
-export default function Page() {
+export default async function Page() {
+    const notebooks = await getNotebooks();
     return (
-        <main className="flex min-h-screen flex-col p-6">
-            <h1>hello!</h1>
-            <Link
-                href="/upload-book"
-                color="blue.400"
-                _hover={{ color: "blue.500" }}
-            >
-                Upload a book
-            </Link>
+        <main>
+            <Suspense fallback={<h1>Loading</h1>}>
+                <Gallery notebooks={notebooks} />
+            </Suspense>
         </main>
     );
 }
