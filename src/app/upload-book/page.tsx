@@ -23,9 +23,7 @@ export default function Page() {
                 data: file.data || ""
             });
         });
-
-        await sleep(4000);
-
+        // TODO: error handling
         return { success: true };
     }
     return (
