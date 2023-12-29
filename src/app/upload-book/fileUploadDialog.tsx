@@ -11,18 +11,18 @@ import {
     Box,
     Heading,
     Button,
-    useToast
+    useToast,
 } from "@chakra-ui/react";
 
 export default function FileUploadDialog({
     upload,
 }: {
-    upload: (files: FileType[]) => Promise<{ success: boolean}>;
+    upload: (files: FileType[]) => Promise<{ success: boolean }>;
 }) {
     const [files, setFiles] = useState<FileType[]>([]);
     const [isUploading, setIsUploading] = useState<boolean>(false);
     const toast = useToast();
-    
+
     return (
         <Box p={5}>
             <FileUploader
@@ -62,22 +62,27 @@ export default function FileUploadDialog({
                                     `Uploading ${files.length} to server.`,
                                 );
                                 setIsUploading(true);
-                                upload(files).then((resp) => {
-                                    console.log(`Upload success: ${resp.success}`);
-                                    setFiles([]);
-                                    toast({
-                                        title: 'Upload successful.',
-                                        description: "The files you uploaded have been stored successfully and are now in the Gallery.",
-                                        position: "top",
-                                        status: 'success',
-                                        duration: 9000,
-                                        isClosable: true,
+                                upload(files)
+                                    .then((resp) => {
+                                        console.log(
+                                            `Upload success: ${resp.success}`,
+                                        );
+                                        setFiles([]);
+                                        toast({
+                                            title: "Upload successful.",
+                                            description:
+                                                "The files you uploaded have been stored successfully and are now in the Gallery.",
+                                            position: "top",
+                                            status: "success",
+                                            duration: 9000,
+                                            isClosable: true,
+                                        });
+                                    })
+                                    .finally(() => {
+                                        setIsUploading(false);
                                     });
-                                }).finally(() => {
-                                    setIsUploading(false);
-                                });
                             }}
-                            loadingText='Uploading'
+                            loadingText="Uploading"
                             isLoading={isUploading}
                             isDisabled={isUploading}
                         >

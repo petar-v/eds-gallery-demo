@@ -17,12 +17,16 @@ export default function Page() {
     async function upload(files: FileType[]) {
         "use server";
         console.log(files.map((file) => file.name));
-        files.filter(file => file.data !== null).forEach((file) => { 
-            addNotebook({
-                title: file.name,
-                data: file.data || ""
+
+        // TODO: add in parallel
+        files
+            .filter((file) => file.data !== null)
+            .forEach(async (file) => {
+                await addNotebook({
+                    title: file.name,
+                    data: file.data || "",
+                });
             });
-        });
         // TODO: error handling
         return { success: true };
     }
