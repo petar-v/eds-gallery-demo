@@ -1,13 +1,6 @@
 import { Box, Text, Stack, Image, ColorProps } from "@chakra-ui/react";
 import { AttachmentIcon } from "@chakra-ui/icons";
-
-export interface fileType {
-    path: string;
-    type: "file" | "folder";
-    name: string;
-    mimeType: string;
-    data: string;
-}
+import { FileType } from "@/definitions/FileType";
 
 export type FileTypeProp =
     | "image"
@@ -16,6 +9,7 @@ export type FileTypeProp =
     | "text"
     | "pdf"
     | "markdown"
+    | "jupyter"
     | "other";
 
 const fileTypeText = (fileType: FileTypeProp): string => {
@@ -26,17 +20,38 @@ const fileTypeText = (fileType: FileTypeProp): string => {
         text: "Text files",
         pdf: "Pdf files",
         markdown: "Markdown files",
+        jupyter: "Jupyter notebook file",
         other: "Other files",
     };
     return map[fileType];
+};
+
+const validateFileType = (file: File, fileType: FileTypeProp): boolean => {
+    if (fileType == "other") return true;
+
+    if (file.type == "application/pdf" && fileType == "pdf") return true;
+
+    if (file.type === "" && fileType === "jupyter") return true;
+
+    return file.type.split("/")[0] == fileType;
+};
+
+const fileTypeToMime = (fileType: FileTypeProp): string => {
+    if (fileType == "pdf") return "application/pdf";
+
+    if (fileType == "other") return "*";
+
+    if (fileType == "jupyter") return ".ipynb";
+
+    return fileType + "/*";
 };
 
 async function getAllFileEntries(
     dataTransferItemList: DataTransferItemList,
     maxSize: number,
     fileType: FileTypeProp,
-): Promise<fileType[]> {
-    let fileEntries: fileType[] = [];
+): Promise<FileType[]> {
+    let fileEntries: FileType[] = [];
     let queue = [];
 
     for (let i = 0; i < dataTransferItemList.length; i++) {
@@ -58,12 +73,10 @@ async function getAllFileEntries(
 
                     reader.onload = () => {
                         // Do all the checks
+                        console.log(file.type);
                         if (
                             (maxSize == -1 || file.size < maxSize) &&
-                            (file.type.split("/")[0] == fileType ||
-                                (file.type == "application/pdf" &&
-                                    fileType == "pdf") ||
-                                fileType == "other")
+                            validateFileType(file, fileType)
                         ) {
                             fileEntries.push({
                                 path: (
@@ -76,7 +89,7 @@ async function getAllFileEntries(
                                 name: file.name,
                                 mimeType:
                                     file.type || "application/octet-stream",
-                                data: reader.result?.toString() || "",
+                                data: reader.result,
                             });
                         }
                         resolve(0);
@@ -168,7 +181,7 @@ export default function FileUploader({
     backgroundColor?: ColorProps["color"];
     showOver?: boolean;
     onUploadStart: () => void;
-    onUploadEnd: (files: fileType[]) => void;
+    onUploadEnd: (files: FileType[]) => void;
 }) {
     // The main render of the component
     return (
@@ -182,7 +195,7 @@ export default function FileUploader({
             textAlign="center"
             border="1px solid"
             borderColor="gray.100"
-            borderRadius="10px"
+            borderRadius="md"
             onDragOver={(e) => {
                 // Prevent default browser action for file drag
                 e.stopPropagation();
@@ -209,7 +222,11 @@ export default function FileUploader({
                     onUploadStart();
 
                     // Process the files
-                    let items = await getAllFileEntries(e.dataTransfer.items, maxSize, fileType);
+                    let items = await getAllFileEntries(
+                        e.dataTransfer.items,
+                        maxSize,
+                        fileType,
+                    );
 
                     // Call this after the processing of the file is finished
                     onUploadEnd(items);
@@ -225,7 +242,7 @@ export default function FileUploader({
                 <AttachmentIcon />
             </Box>
             <Stack direction="column" spacing="0.5rem">
-                <Box fontSize="sm">
+                <Box>
                     <Text
                         position="relative"
                         display="inline"
@@ -237,13 +254,7 @@ export default function FileUploader({
                         <input /* This component is only clickable but not viewable */
                             type="file"
                             placeholder=""
-                            accept={
-                                fileType == "pdf"
-                                    ? "application/pdf"
-                                    : fileType == "other"
-                                      ? "*"
-                                      : fileType + "/*"
-                            }
+                            accept={fileTypeToMime(fileType)}
                             style={{
                                 opacity: "0",
                                 position: "absolute",
@@ -268,7 +279,7 @@ export default function FileUploader({
                                     // Call this before processing the files
                                     onUploadStart();
 
-                                    let items: fileType[] = [];
+                                    let items: FileType[] = [];
 
                                     for (
                                         var i = 0;
@@ -291,14 +302,10 @@ export default function FileUploader({
                                                         (maxSize == -1 ||
                                                             file.size <
                                                                 maxSize) &&
-                                                        (file.type.split(
-                                                            "/",
-                                                        )[0] == fileType ||
-                                                            (file.type ==
-                                                                "application/pdf" &&
-                                                                fileType ==
-                                                                    "pdf") ||
-                                                            fileType == "other")
+                                                        validateFileType(
+                                                            file,
+                                                            fileType,
+                                                        )
                                                     ) {
                                                         items.push({
                                                             path: "/",
@@ -308,7 +315,7 @@ export default function FileUploader({
                                                                 file.type ||
                                                                 "application/octet-stream",
                                                             data:
-                                                                reader.result?.toString() ||
+                                                                reader.result ||
                                                                 "",
                                                         });
                                                     }
@@ -331,8 +338,8 @@ export default function FileUploader({
                 <Text fontSize="xs">
                     {fileTypeText(fileType)}
                     {maxSize != -1
-                        ? "up to " + formatFileSize(maxSize)
-                        : "up to unlimited GBs"}
+                        ? " up to " + formatFileSize(maxSize)
+                        : " up to unlimited GBs"}
                 </Text>
             </Stack>
         </Stack>

@@ -5,6 +5,9 @@ const nextConfig = {
 
     experimental: {
         webpackBuildWorker: true,
+        serverActions: {
+            bodySizeLimit: "10mb",
+        },
     },
     sassOptions: {
         includePaths: [path.join(__dirname, "styles")],
