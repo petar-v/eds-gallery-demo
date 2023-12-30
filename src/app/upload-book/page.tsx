@@ -11,8 +11,6 @@ export const metadata: Metadata = {
     description: "Upload a new EDS Book",
 };
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
 export default function Page() {
     async function upload(
         notebook: Notebook,
@@ -20,8 +18,6 @@ export default function Page() {
         "use server";
         try {
             await addNotebook(notebook);
-            await sleep(4000);
-            // FIXME: remove the sleep
             return { success: true };
         } catch (err) {
             return {
