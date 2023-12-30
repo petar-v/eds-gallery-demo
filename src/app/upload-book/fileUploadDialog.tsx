@@ -1,96 +1,189 @@
 "use client";
 
 import { useState } from "react";
+import NextLink from "next/link";
+import { useRouter } from "next/navigation";
+import {
+    Alert,
+    AlertDescription,
+    AlertIcon,
+    AlertTitle,
+    Spinner,
+    VStack,
+    useToast,
+    Link,
+    Button,
+    ButtonGroup,
+} from "@chakra-ui/react";
+import { RepeatClockIcon } from "@chakra-ui/icons";
 
 import FileUploader from "./components/fileUploader";
-import { FileType } from "@/definitions/FileType";
+import NotebookDetailsEdit from "./components/notebookDetailsEdit";
 
-import {
-    UnorderedList,
-    ListItem,
-    Box,
-    Heading,
-    Button,
-    useToast,
-} from "@chakra-ui/react";
+import { FileType } from "@/definitions/FileType";
+import Notebook from "@/definitions/Notebook";
+import { parseFileEncodedNotebook } from "@/lib/notebooks";
 
 export default function FileUploadDialog({
     upload,
 }: {
-    upload: (files: FileType[]) => Promise<{ success: boolean }>;
+    upload: (
+        notebook: Notebook,
+    ) => Promise<{ success: boolean; error?: string }>;
 }) {
-    const [files, setFiles] = useState<FileType[]>([]);
-    const [isUploading, setIsUploading] = useState<boolean>(false);
-    const toast = useToast();
+    const [notebook, setNotebook] = useState<Notebook>();
+    const [isLoading, setIsLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState<string>();
 
-    return (
-        <Box p={5}>
+    const toast = useToast();
+    const router = useRouter();
+
+    const onSubmit = (notebook: Notebook) =>
+        upload(notebook).then(({ success, error }) => {
+            if (success) setSuccess(true);
+            else setError(error);
+        });
+
+    const handleRefresh = () => {
+        setNotebook(undefined);
+        setIsLoading(false);
+        setSuccess(false);
+        setError(undefined);
+        router.refresh();
+    };
+    if (error) {
+        return (
+            <VStack align="center" justify="center">
+                <Alert
+                    status="error"
+                    variant="subtle"
+                    flexDirection="column"
+                    alignItems="center"
+                    justifyContent="center"
+                    textAlign="center"
+                >
+                    <AlertIcon boxSize="40px" mr={0} />
+                    <AlertTitle mt={4} mb={1} fontSize="lg">
+                        Upload failed!
+                    </AlertTitle>
+                    <AlertDescription maxWidth="sm">
+                        The files were not uploaded successfully. {error}
+                    </AlertDescription>
+                </Alert>
+                <ButtonGroup w="100%">
+                    <Button
+                        onClick={handleRefresh}
+                        border="2px"
+                        w="100%"
+                        leftIcon={<RepeatClockIcon />}
+                    >
+                        Retry
+                    </Button>
+                </ButtonGroup>
+            </VStack>
+        );
+    }
+    if (success) {
+        return (
+            <VStack align="center" justify="center">
+                <Alert
+                    status="success"
+                    variant="subtle"
+                    flexDirection="column"
+                    alignItems="center"
+                    justifyContent="center"
+                    textAlign="center"
+                >
+                    <AlertIcon boxSize="40px" mr={0} />
+                    <AlertTitle mt={4} mb={1} fontSize="lg">
+                        Upload successful!
+                    </AlertTitle>
+                    <AlertDescription maxWidth="sm">
+                        The files you uploaded have been stored successfully and
+                        are now in the{" "}
+                        <Link as={NextLink} href="/">
+                            Gallery.
+                        </Link>
+                    </AlertDescription>
+                </Alert>
+                <ButtonGroup w="100%">
+                    <Button
+                        onClick={handleRefresh}
+                        border="2px"
+                        w="100%"
+                        borderColor="green.500"
+                        leftIcon={<RepeatClockIcon />}
+                    >
+                        Upload another
+                    </Button>
+                </ButtonGroup>
+            </VStack>
+        );
+    }
+    if (isLoading) {
+        return (
+            <VStack py={8} align="center">
+                <Spinner
+                    thickness="5px"
+                    speed="0.65s"
+                    emptyColor="gray.200"
+                    color="purple"
+                    size="xl"
+                />
+                <p>Processing notebook...</p>
+            </VStack>
+        );
+    }
+    if (!notebook) {
+        return (
             <FileUploader
-                maxSize={10 * 1000000}
+                maxSize={10 * 1000 * 1000}
                 fileType="jupyter"
                 primaryColor={"red.400"}
                 secondaryColor={"gray.100"}
                 backgroundColor={"white"}
                 showOver={true}
                 onUploadStart={() => {
-                    console.log("upload start");
+                    setIsLoading(true);
                 }}
-                onUploadEnd={(uploadedFiles: FileType[]) => {
-                    console.log("upload end", files);
-                    uploadedFiles.forEach((file) => {
-                        files.push(file);
-                        setFiles([...files]);
-                    });
+                onUploadEnd={async (uploadedFiles: FileType[]) => {
+                    console.log("uploaded", uploadedFiles);
+                    if (uploadedFiles.length > 0) {
+                        // try parsing the files one by one until we find a proper jupyter notebook
+                        for (const uploadedFile of uploadedFiles) {
+                            try {
+                                const notebook = await parseFileEncodedNotebook(
+                                    uploadedFile.data || "",
+                                );
+                                setNotebook(notebook);
+                                break;
+                            } catch (err) {
+                                toast({
+                                    title: "Unrecognized file type.",
+                                    description: `The file ${uploadedFile.name} is not a Jupyter Notebook or something we can handle.`,
+                                    position: "top",
+                                    status: "error",
+                                    duration: 9000,
+                                    isClosable: true,
+                                });
+                                continue;
+                            }
+                        }
+                    }
+                    setIsLoading(false);
                 }}
             />
-            {files.length > 0 && (
-                <>
-                    <Box m={5}>
-                        <Heading size="xs">Files to upload</Heading>
-                        <UnorderedList>
-                            {files.map((file, i) => {
-                                return <ListItem key={i}>{file.name}</ListItem>;
-                            })}
-                        </UnorderedList>
-                    </Box>
-                    <Box>
-                        <Button
-                            colorScheme="purple"
-                            w="100%"
-                            onClick={() => {
-                                console.log(
-                                    `Uploading ${files.length} to server.`,
-                                );
-                                setIsUploading(true);
-                                upload(files)
-                                    .then((resp) => {
-                                        console.log(
-                                            `Upload success: ${resp.success}`,
-                                        );
-                                        setFiles([]);
-                                        toast({
-                                            title: "Upload successful.",
-                                            description:
-                                                "The files you uploaded have been stored successfully and are now in the Gallery.",
-                                            position: "top",
-                                            status: "success",
-                                            duration: 9000,
-                                            isClosable: true,
-                                        });
-                                    })
-                                    .finally(() => {
-                                        setIsUploading(false);
-                                    });
-                            }}
-                            loadingText="Uploading"
-                            isLoading={isUploading}
-                            isDisabled={isUploading}
-                        >
-                            Upload
-                        </Button>
-                    </Box>
-                </>
-            )}
-        </Box>
+        );
+    }
+
+    return (
+        <NotebookDetailsEdit
+            notebook={notebook}
+            onReset={() => {
+                setNotebook(undefined);
+            }}
+            onSubmit={onSubmit}
+        />
     );
 }

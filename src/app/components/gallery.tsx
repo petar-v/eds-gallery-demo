@@ -12,10 +12,14 @@ import {
 } from "@chakra-ui/react";
 import { Search2Icon } from "@chakra-ui/icons";
 
-import Notebook from "@/definitions/Notebook";
+import { NotebookMetadata } from "@/definitions/Notebook";
 import NotebookCard from "./notebookCard";
 
-export default function Gallery({ notebooks }: { notebooks: Notebook[] }) {
+export default function Gallery({
+    notebooks,
+}: {
+    notebooks: NotebookMetadata[];
+}) {
     return (
         <VStack
             h="100vh"
@@ -47,7 +51,6 @@ export default function Gallery({ notebooks }: { notebooks: Notebook[] }) {
                     />
                 </InputGroup>
             </Box>
-
             <Box
                 maxW="lg"
                 w="full"
