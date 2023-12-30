@@ -1,6 +1,6 @@
 "use client";
 
-import { SubmitHandler, useForm } from "react-hook-form";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import {
     FormErrorMessage,
     ButtonGroup,
@@ -8,61 +8,51 @@ import {
     FormLabel,
     Input,
     Button,
-    useToast,
     Flex,
     Stack,
 } from "@chakra-ui/react";
+import { StarIcon } from "@chakra-ui/icons";
 
 import TagInput from "./tagInput";
 
 import Notebook from "@/definitions/Notebook";
+import { FileType } from "@/definitions/FileType";
+import FileUploader from "./fileUploader";
 
 interface NotebookEditForm {
     title: string;
-    author: string;
     tags: string[];
+    image?: string;
+    author?: string;
 }
 
 export default function NotebookDetailsEdit({
-    upload,
+    onSubmit,
+    onReset,
     notebook,
 }: {
     notebook: Notebook;
-    upload: (notebook: Notebook) => Promise<{ success: boolean }>;
+    onSubmit: (notebook: Notebook) => Promise<void>;
+    onReset: () => void;
 }) {
     const {
         handleSubmit,
         control,
         register,
-        getValues,
         formState: { errors, isSubmitting },
     } = useForm<NotebookEditForm>({
         defaultValues: notebook,
     });
 
-    const toast = useToast();
-
-    const onSubmit: SubmitHandler<NotebookEditForm> = () => {
-        const updatedNotebook = {
+    const onFormSubmit: SubmitHandler<NotebookEditForm> = (updatedValues) =>
+        onSubmit({
             ...notebook,
-            // TODO: add values
-        };
-        upload(updatedNotebook).then((resp) => {
-            console.log(`Upload success: ${resp.success}`);
-            toast({
-                title: "Upload successful.",
-                description:
-                    "The files you uploaded have been stored successfully and are now in the Gallery.",
-                position: "top",
-                status: "success",
-                duration: 9000,
-                isClosable: true,
-            });
+            ...updatedValues,
         });
-    };
 
+    // TODO: validation with yup or something...
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onFormSubmit)}>
             <Stack spacing={3}>
                 <FormControl isRequired>
                     <FormLabel>Title</FormLabel>
@@ -80,10 +70,57 @@ export default function NotebookDetailsEdit({
                     </FormErrorMessage>
                 </FormControl>
 
+                <FormControl>
+                    <FormLabel>Hero image</FormLabel>
+                    <Controller
+                        control={control}
+                        name="image"
+                        render={({ field }) => (
+                            <FileUploader
+                                maxSize={2 * 1000 * 1000}
+                                fileType="image"
+                                primaryColor={"red.400"}
+                                secondaryColor={"gray.100"}
+                                backgroundColor={"white"}
+                                showOver={true}
+                                onUploadStart={() => {}}
+                                preview={
+                                    field.value ? (
+                                        <img
+                                            alt="Notebook preview image"
+                                            src={field.value}
+                                        />
+                                    ) : (
+                                        <StarIcon />
+                                    )
+                                }
+                                onUploadEnd={(uploadedFiles: FileType[]) => {
+                                    console.log(
+                                        "image upload ended",
+                                        uploadedFiles,
+                                    );
+                                    if (uploadedFiles.length > 0) {
+                                        field.onChange &&
+                                            field.onChange(
+                                                uploadedFiles[0].data?.toString(),
+                                            );
+                                    }
+                                }}
+                            />
+                        )}
+                    />
+                    <FormErrorMessage>
+                        {errors.image && errors.image.message}
+                    </FormErrorMessage>
+                </FormControl>
+
                 <Flex justify="center" align="center" direction="column">
                     <FormControl>
                         <FormLabel>Notebook Tags</FormLabel>
                         <TagInput control={control} name="tags" />
+                        <FormErrorMessage>
+                            {errors.tags && errors.tags.message}
+                        </FormErrorMessage>
                     </FormControl>
                 </Flex>
 
@@ -98,13 +135,7 @@ export default function NotebookDetailsEdit({
                     >
                         Save & Upload
                     </Button>
-                    <Button
-                        onClick={() => {
-                            alert(JSON.stringify(getValues()));
-                        }}
-                    >
-                        Back
-                    </Button>
+                    <Button onClick={onReset}>Back</Button>
                 </ButtonGroup>
             </Stack>
         </form>

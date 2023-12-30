@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 
-import { Box, Heading, Flex } from "@chakra-ui/react";
+import { Box, Heading, VStack } from "@chakra-ui/react";
 import FileUploadDialog from "./fileUploadDialog";
 
 import { FileType } from "@/definitions/FileType";
@@ -40,27 +40,26 @@ export default function Page() {
     async function mockUpload(notebook: Notebook) {
         "use server";
         console.log("New notebook", notebook.title, notebook.tags.join(", "));
-        return { success: true };
+        return { success: true, error: "" };
     }
 
     return (
         <main>
-            <Flex
-                align="center"
-                justify="center"
-                h="100vh"
-                direction="column"
-                bg="gray.100"
-                grow={1}
-                mt={0}
-            >
-                <Heading mb={6} h={10}>
-                    Upload a Jupyter Notebook
-                </Heading>
-                <Box maxW="lg" w="full" bg="white" boxShadow="lg" rounded="md">
-                    <FileUploadDialog upload={mockUpload} />
-                </Box>
-            </Flex>
+            <Box py={5}>
+                <VStack align="center" spacing={2}>
+                    <Heading>Upload a Jupyter Notebook</Heading>
+                    <Box
+                        maxW="lg"
+                        w="full"
+                        bg="white"
+                        boxShadow="lg"
+                        rounded="md"
+                        p={5}
+                    >
+                        <FileUploadDialog upload={mockUpload} />
+                    </Box>
+                </VStack>
+            </Box>
         </main>
     );
 }

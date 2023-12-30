@@ -1,6 +1,7 @@
 import { Box, Text, Stack, ColorProps } from "@chakra-ui/react";
 import { AttachmentIcon } from "@chakra-ui/icons";
 import { FileType } from "@/definitions/FileType";
+import { ChangeEventHandler } from "react";
 
 export type FileTypeProp =
     | "image"
@@ -173,6 +174,7 @@ export default function FileUploader({
     showOver = true,
     onUploadStart,
     onUploadEnd,
+    preview,
 }: {
     maxSize?: number;
     fileType?: FileTypeProp;
@@ -182,8 +184,59 @@ export default function FileUploader({
     showOver?: boolean;
     onUploadStart: () => void;
     onUploadEnd: (files: FileType[]) => void;
+    preview?: React.ReactNode;
 }) {
-    // The main render of the component
+    const onFileSelectionChange: ChangeEventHandler<HTMLInputElement> = async (
+        e,
+    ) => {
+        // Prevent default browser action for file upload
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (e.target.files && e.target.files.length > 0) {
+            // Call this before processing the files
+            onUploadStart();
+
+            let items: FileType[] = [];
+
+            for (var i = 0; i < e.target.files.length; i++) {
+                // This is a file (cannot upload folder via input tag)
+                await new Promise((resolve, reject) => {
+                    // Read file data and save to base64
+                    const file = e.target.files?.item(i);
+
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.readAsDataURL(file);
+
+                        reader.onload = () => {
+                            // Do all the checks
+                            if (
+                                (maxSize == -1 || file.size < maxSize) &&
+                                validateFileType(file, fileType)
+                            ) {
+                                items.push({
+                                    path: "/",
+                                    type: "file",
+                                    name: file.name,
+                                    mimeType:
+                                        file.type || "application/octet-stream",
+                                    data: reader.result || "",
+                                });
+                            }
+                            resolve(0);
+                        };
+
+                        reader.onerror = reject;
+                    }
+                });
+            }
+
+            // Call this after the processing of the file is finished
+            onUploadEnd(items);
+        }
+    };
+
     return (
         <Stack
             backgroundColor={backgroundColor}
@@ -239,7 +292,7 @@ export default function FileUploader({
                 borderRadius="10px"
                 margin="auto"
             >
-                <AttachmentIcon />
+                {preview ? preview : <AttachmentIcon />}
             </Box>
             <Stack direction="column" spacing="0.5rem">
                 <Box>
@@ -267,70 +320,7 @@ export default function FileUploader({
                                 cursor: "pointer",
                             }}
                             multiple={true}
-                            onChange={async (e) => {
-                                // Prevent default browser action for file upload
-                                e.preventDefault();
-                                e.stopPropagation();
-
-                                if (
-                                    e.target.files &&
-                                    e.target.files.length > 0
-                                ) {
-                                    // Call this before processing the files
-                                    onUploadStart();
-
-                                    let items: FileType[] = [];
-
-                                    for (
-                                        var i = 0;
-                                        i < e.target.files.length;
-                                        i++
-                                    ) {
-                                        // This is a file (cannot upload folder via input tag)
-                                        await new Promise((resolve, reject) => {
-                                            // Read file data and save to base64
-                                            const file =
-                                                e.target.files?.item(i);
-
-                                            if (file) {
-                                                const reader = new FileReader();
-                                                reader.readAsDataURL(file);
-
-                                                reader.onload = () => {
-                                                    // Do all the checks
-                                                    if (
-                                                        (maxSize == -1 ||
-                                                            file.size <
-                                                                maxSize) &&
-                                                        validateFileType(
-                                                            file,
-                                                            fileType,
-                                                        )
-                                                    ) {
-                                                        items.push({
-                                                            path: "/",
-                                                            type: "file",
-                                                            name: file.name,
-                                                            mimeType:
-                                                                file.type ||
-                                                                "application/octet-stream",
-                                                            data:
-                                                                reader.result ||
-                                                                "",
-                                                        });
-                                                    }
-                                                    resolve(0);
-                                                };
-
-                                                reader.onerror = reject;
-                                            }
-                                        });
-                                    }
-
-                                    // Call this after the processing of the file is finished
-                                    onUploadEnd(items);
-                                }
-                            }}
+                            onChange={onFileSelectionChange}
                         />
                     </Text>{" "}
                     <Text display="inline">or drag and drop</Text>
