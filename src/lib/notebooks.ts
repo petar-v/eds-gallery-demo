@@ -23,22 +23,20 @@ const toString = (data: string | ArrayBuffer): string => {
 };
 
 const decode = (data: string | ArrayBuffer): string => {
-    const dataString = toString(data);
-
-    const base64String = dataString.split(";base64,").pop();
+    const base64String = toString(data).split(";base64,").pop();
     return atob(base64String || "");
 };
 
-export const parseNotebook = async (
-    data: string | ArrayBuffer,
-): Promise<Notebook> => {
-    const decoded = decode(data);
-    const json = JSON.parse(decoded) as Ipynb;
-    const firstCell = json.cells
-        .find((cell) => cell.cell_type === "markdown")
-        ?.source.join("");
+export const parseNotebook = async (data: string): Promise<Notebook> => {
+    const json = JSON.parse(data) as Ipynb;
 
-    const htmlString = await parse(firstCell || "");
+    const mdCells = json.cells
+        .filter((cell) => cell.cell_type === "markdown")
+        .map((cell) => cell.source.join(""))
+        .join("");
+
+    const htmlString = await parse(mdCells || "");
+    console.log(htmlString);
 
     const $ = load(htmlString);
 
@@ -47,13 +45,16 @@ export const parseNotebook = async (
         .toArray()
         .map((tag) => $(tag).text().trim())
         .filter((tag) => tag !== "tag");
-    console.log(title, tags);
 
-    const nb = {
+    return {
         title,
         tags,
-        data: decoded,
+        data,
     };
+};
 
-    return nb;
+export const parseFileEncodedNotebook = async (
+    data: string | ArrayBuffer,
+): Promise<Notebook> => {
+    return parseNotebook(decode(data));
 };

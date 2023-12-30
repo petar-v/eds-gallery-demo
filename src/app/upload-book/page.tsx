@@ -5,7 +5,8 @@ import FileUploadDialog from "./fileUploadDialog";
 
 import { FileType } from "@/definitions/FileType";
 import { addNotebook } from "@/lib/storage";
-import { parseNotebook } from "@/lib/notebooks";
+import { parseFileEncodedNotebook } from "@/lib/notebooks";
+import Notebook from "@/definitions/Notebook";
 
 export const metadata: Metadata = {
     title: "Upload a new EDS Book",
@@ -24,7 +25,9 @@ export default function Page() {
             .filter((file) => file.data !== null)
             .forEach(async (file) => {
                 try {
-                    const notebook = await parseNotebook(file.data || "");
+                    const notebook = await parseFileEncodedNotebook(
+                        file.data || "",
+                    );
                     await addNotebook(notebook);
                 } catch (err) {
                     // console.error("Failed to parse notebook " + file.name, err);
@@ -33,6 +36,13 @@ export default function Page() {
         // TODO: error handling
         return { success: true };
     }
+
+    async function mockUpload(notebook: Notebook) {
+        "use server";
+        console.log("New notebook", notebook.title, notebook.tags.join(", "));
+        return { success: true };
+    }
+
     return (
         <main>
             <Flex
@@ -48,7 +58,7 @@ export default function Page() {
                     Upload a Jupyter Notebook
                 </Heading>
                 <Box maxW="lg" w="full" bg="white" boxShadow="lg" rounded="md">
-                    <FileUploadDialog upload={upload} />
+                    <FileUploadDialog upload={mockUpload} />
                 </Box>
             </Flex>
         </main>

@@ -4,7 +4,8 @@ import Notebook from "@/definitions/Notebook";
 
 const notebooks: { [hash in string]: Notebook } = {};
 
-export const getNotebooks = async (): Promise<Notebook[]> => Object.values(notebooks);
+export const getNotebooks = async (): Promise<Notebook[]> =>
+    Object.values(notebooks);
 
 export const removeNotebookByID = async (id: string) => {
     delete notebooks[md5(id.trim())];
