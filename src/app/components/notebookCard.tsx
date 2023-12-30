@@ -20,17 +20,17 @@ export default function NotebookCard({
 }) {
     return (
         <Card
+            cursor={onClick ? "pointer" : undefined}
             onClick={() => {
                 onClick && onClick(notebook);
             }}
-            cursor={onClick ? "pointer" : undefined}
         >
             <CardHeader>
                 <Heading size="md">{notebook.title}</Heading>
             </CardHeader>
             <CardBody></CardBody>
             <CardFooter>
-                <Flex direction="row" p={3} gap={2} wrap="wrap">
+                <Flex wrap="wrap" direction="row" gap={2} p={3}>
                     {notebook.tags.map((tag, i) => (
                         <ColorfulTag key={`tag-${i}`} tag={tag} />
                     ))}

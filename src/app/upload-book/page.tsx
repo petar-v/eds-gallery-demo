@@ -34,12 +34,12 @@ export default function Page() {
                     <Heading>Upload a Jupyter Notebook</Heading>
                     {process.env.APP_ROOT}
                     <Box
-                        maxW="lg"
                         w="full"
-                        bg="white"
-                        boxShadow="lg"
-                        rounded="md"
+                        maxW="lg"
                         p={5}
+                        bg="white"
+                        shadow="lg"
+                        rounded="md"
                     >
                         <FileUploadDialog upload={upload} />
                     </Box>

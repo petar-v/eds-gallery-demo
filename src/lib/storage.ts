@@ -25,8 +25,8 @@ export const configureDatabase = async () => {
     db.release();
 };
 
-export const disconnectDatabase = async () => {
-    pool.close();
+export const disconnectDatabase = () => {
+    return pool.close();
 };
 
 export const clearDatabase = async () => {
@@ -40,7 +40,7 @@ const deserializeTags = (tags: string) => tags.split(",").map((t) => t.trim());
 
 export const getNotebookPreviews = async (): Promise<NotebookMetadata[]> => {
     const db = await pool.acquire();
-    let allBooks = db
+    const allBooks = db
         .prepare(`SELECT id, title, author, tags, image FROM ${TABLE}`)
         .all();
     db.release();
@@ -83,16 +83,4 @@ export const removeNotebookByID = async (id: number): Promise<number> => {
 export const removeNotebook = async (nb: NotebookMetadata): Promise<number> => {
     if (nb.id) return removeNotebookByID(nb.id);
     throw new Error(`Notebook ID not provided for ${nb.title}`);
-};
-
-const notebooks: { [hash in string]: Notebook } = {};
-
-export const searchNotebooks = async (query: string): Promise<Notebook[]> => {
-    const byTitle = Object.values(notebooks).filter((notebook) =>
-        notebook.title.includes(query),
-    );
-
-    // TODO: search by tags
-    // dedupe
-    return [...byTitle];
 };

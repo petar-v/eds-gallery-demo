@@ -72,19 +72,35 @@ export default function FileUploadDialog({
     }
     if (isLoading) {
         return (
-            <VStack py={8} align="center">
+            <VStack align="center" py={8}>
                 <Spinner
-                    thickness="5px"
-                    speed="0.65s"
-                    emptyColor="gray.200"
                     color="purple"
+                    emptyColor="gray.200"
                     size="xl"
+                    speed="0.65s"
+                    thickness="5px"
                 />
                 <p>Processing notebook...</p>
             </VStack>
         );
     }
     if (!notebook) {
+        const toastErrorMessage = ({
+            title,
+            description,
+        }: {
+            title: string;
+            description: string;
+        }) =>
+            toast({
+                title,
+                description,
+                position: "top",
+                status: "error",
+                duration: 9000,
+                isClosable: true,
+            });
+
         return (
             <FileUploader
                 maxSize={10 * 1000 * 1000}
@@ -96,29 +112,25 @@ export default function FileUploadDialog({
                 onUploadStart={() => {
                     setIsLoading(true);
                 }}
-                onUploadEnd={async (uploadedFiles: FileType[]) => {
+                onUploadEnd={(uploadedFiles: FileType[]) => {
                     console.log("uploaded", uploadedFiles);
+
                     if (uploadedFiles.length > 0) {
-                        // try parsing the files one by one until we find a proper jupyter notebook
-                        for (const uploadedFile of uploadedFiles) {
-                            try {
-                                const notebook = await parseFileEncodedNotebook(
-                                    uploadedFile.data || "",
-                                );
-                                setNotebook(notebook);
-                                break;
-                            } catch (err) {
-                                toast({
+                        const uploadedFile = uploadedFiles[0];
+                        // TODO: try parsing the files one by one until we find a proper jupyter notebook
+                        parseFileEncodedNotebook(uploadedFile.data || "")
+                            .then(setNotebook)
+                            .catch((error) => {
+                                toastErrorMessage({
                                     title: "Unrecognized file type.",
                                     description: `The file ${uploadedFile.name} is not a Jupyter Notebook or something we can handle.`,
-                                    position: "top",
-                                    status: "error",
-                                    duration: 9000,
-                                    isClosable: true,
                                 });
-                                continue;
-                            }
-                        }
+                            });
+                    } else {
+                        toastErrorMessage({
+                            title: "Unrecognized files.",
+                            description: `It seems the files failed to upload. Please try again later.`,
+                        });
                     }
                     setIsLoading(false);
                 }}

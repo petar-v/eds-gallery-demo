@@ -53,6 +53,7 @@ export default function NotebookDetailsEdit({
 
     // TODO: validation with yup or something...
     return (
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         <form onSubmit={handleSubmit(onFormSubmit)}>
             <Stack spacing={3}>
                 <FormControl isRequired>
@@ -115,7 +116,7 @@ export default function NotebookDetailsEdit({
                     </FormErrorMessage>
                 </FormControl>
 
-                <Flex justify="center" align="center" direction="column">
+                <Flex align="center" justify="center" direction="column">
                     <FormControl>
                         <FormLabel>Notebook Tags</FormLabel>
                         <TagInput control={control} name="tags" />
@@ -127,12 +128,12 @@ export default function NotebookDetailsEdit({
 
                 <ButtonGroup gap="2">
                     <Button
-                        colorScheme="purple"
                         flex={1}
-                        type="submit"
-                        loadingText="Uploading"
-                        isLoading={isSubmitting}
+                        colorScheme="purple"
                         isDisabled={isSubmitting}
+                        isLoading={isSubmitting}
+                        loadingText="Uploading"
+                        type="submit"
                     >
                         Save & Upload
                     </Button>

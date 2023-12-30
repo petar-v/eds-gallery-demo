@@ -1,3 +1,5 @@
+import React from "react";
+
 import { Box, Text, Stack, ColorProps } from "@chakra-ui/react";
 import { AttachmentIcon } from "@chakra-ui/icons";
 import { FileType } from "@/definitions/FileType";
@@ -56,8 +58,8 @@ async function getAllFileEntries(
     maxSize: number,
     fileType: FileTypeProp,
 ): Promise<FileType[]> {
-    let fileEntries: FileType[] = [];
-    let queue = [];
+    const fileEntries: FileType[] = [];
+    const queue = [];
 
     for (let i = 0; i < dataTransferItemList.length; i++) {
         // Note webkitGetAsEntry a non-standard feature and may change
@@ -66,7 +68,7 @@ async function getAllFileEntries(
     }
 
     while (queue.length > 0) {
-        let entry = queue.shift();
+        const entry = queue.shift();
 
         if (entry && entry.isFile) {
             // This is a file
@@ -113,7 +115,7 @@ async function getAllFileEntries(
                 data: "",
             });
 
-            let reader = (entry as FileSystemDirectoryEntry).createReader();
+            const reader = (entry as FileSystemDirectoryEntry).createReader();
             queue.push(...(await readAllDirectoryEntries(reader)));
         }
     }
@@ -125,7 +127,7 @@ async function getAllFileEntries(
 async function readAllDirectoryEntries(
     directoryReader: FileSystemDirectoryReader,
 ) {
-    let entries = [];
+    const entries = [];
     let readEntries: any = await readEntriesPromise(directoryReader);
 
     while (readEntries.length > 0) {
@@ -190,9 +192,7 @@ export default function FileUploader({
     onUploadEnd: (files: FileType[]) => void;
     preview?: React.ReactNode;
 }) {
-    const onFileSelectionChange: ChangeEventHandler<HTMLInputElement> = async (
-        e,
-    ) => {
+    const onFileSelectionChange: ChangeEventHandler<HTMLInputElement> = (e) => {
         // Prevent default browser action for file upload
         e.preventDefault();
         e.stopPropagation();
@@ -201,39 +201,34 @@ export default function FileUploader({
             // Call this before processing the files
             onUploadStart();
 
-            let items: FileType[] = [];
+            const items: FileType[] = [];
 
-            for (var i = 0; i < e.target.files.length; i++) {
-                // This is a file (cannot upload folder via input tag)
-                await new Promise((resolve, reject) => {
-                    // Read file data and save to base64
-                    const file = e.target.files?.item(i);
+            [...e.target.files].forEach((file) => {
+                if (file) {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
 
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.readAsDataURL(file);
+                    reader.onload = () => {
+                        if (
+                            (maxSize == -1 || file.size < maxSize) &&
+                            validateFileType(file, fileType)
+                        ) {
+                            items.push({
+                                path: "/",
+                                type: "file",
+                                name: file.name,
+                                mimeType:
+                                    file.type || "application/octet-stream",
+                                data: reader.result || "",
+                            });
+                        }
+                    };
 
-                        reader.onload = () => {
-                            if (
-                                (maxSize == -1 || file.size < maxSize) &&
-                                validateFileType(file, fileType)
-                            ) {
-                                items.push({
-                                    path: "/",
-                                    type: "file",
-                                    name: file.name,
-                                    mimeType:
-                                        file.type || "application/octet-stream",
-                                    data: reader.result || "",
-                                });
-                            }
-                            resolve(0);
-                        };
-
-                        reader.onerror = reject;
-                    }
-                });
-            }
+                    reader.onerror = (error) => {
+                        console.log(`Reader error`, error);
+                    };
+                }
+            });
 
             // Call this after the processing of the file is finished
             onUploadEnd(items);
@@ -242,23 +237,15 @@ export default function FileUploader({
 
     return (
         <Stack
-            backgroundColor={backgroundColor}
-            transition="opacity 250ms ease-in-out"
-            direction="column"
-            spacing="1rem"
-            padding="1rem 4rem"
             alignItems="center"
+            direction="column"
+            p="1rem 4rem"
             textAlign="center"
             border="1px solid"
             borderColor="gray.100"
             borderRadius="md"
-            onDragOver={(e) => {
-                // Prevent default browser action for file drag
-                e.stopPropagation();
-                e.preventDefault();
-
-                showOver && (e.currentTarget.style.opacity = "0.6");
-            }}
+            transition="opacity 250ms ease-in-out"
+            bgColor={backgroundColor}
             onDragLeave={(e) => {
                 // Prevent default browser action for file drag
                 e.stopPropagation();
@@ -266,7 +253,14 @@ export default function FileUploader({
 
                 showOver && (e.currentTarget.style.opacity = "1");
             }}
-            onDrop={async (e) => {
+            onDragOver={(e) => {
+                // Prevent default browser action for file drag
+                e.stopPropagation();
+                e.preventDefault();
+
+                showOver && (e.currentTarget.style.opacity = "0.6");
+            }}
+            onDrop={(e) => {
                 // Prevent default browser action for file drop
                 e.stopPropagation();
                 e.preventDefault();
@@ -278,29 +272,20 @@ export default function FileUploader({
                     onUploadStart();
 
                     // Process the files
-                    let items = await getAllFileEntries(
-                        e.dataTransfer.items,
-                        maxSize,
-                        fileType,
-                    );
-
-                    // Call this after the processing of the file is finished
-                    onUploadEnd(items);
+                    getAllFileEntries(e.dataTransfer.items, maxSize, fileType)
+                        .then(onUploadEnd)
+                        .catch(console.error);
                 }
             }}
+            spacing="1rem"
         >
-            <Box
-                padding="1rem"
-                backgroundColor={secondaryColor}
-                borderRadius="10px"
-                margin="auto"
-            >
+            <Box m="auto" p="1rem" borderRadius="10px" bgColor={secondaryColor}>
                 {preview ? preview : <AttachmentIcon />}
             </Box>
             <Stack direction="column" spacing="0.5rem">
                 <Box>
                     <Text
-                        position="relative"
+                        pos="relative"
                         display="inline"
                         color={primaryColor}
                         fontWeight="bold"

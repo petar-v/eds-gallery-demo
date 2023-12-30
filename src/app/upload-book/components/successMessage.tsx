@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+
 import {
     Alert,
     AlertDescription,
@@ -26,26 +28,26 @@ const SuccessMessage = ({
 }) => (
     <VStack align="center" justify="center">
         <Alert
-            status={status}
-            variant="subtle"
-            flexDirection="column"
             alignItems="center"
             justifyContent="center"
+            flexDir="column"
             textAlign="center"
+            status={status}
+            variant="subtle"
         >
             <AlertIcon boxSize="40px" mr={0} />
             <AlertTitle mt={4} mb={1} fontSize="lg">
                 {title}
             </AlertTitle>
-            <AlertDescription maxWidth="sm">{description}</AlertDescription>
+            <AlertDescription maxW="sm">{description}</AlertDescription>
         </Alert>
         <ButtonGroup w="100%">
             <Button
-                onClick={onRefresh}
-                border="2px"
                 w="100%"
+                border="2px"
                 borderColor={status === "success" ? "green.500" : undefined}
                 leftIcon={<RepeatClockIcon />}
+                onClick={onRefresh}
             >
                 {againLabel}
             </Button>

@@ -4,6 +4,8 @@ import { Providers } from "./providers";
 
 import "@/styles/globals.scss";
 
+import React from "react";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
