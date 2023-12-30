@@ -2,20 +2,8 @@
 
 import { useState } from "react";
 import NextLink from "next/link";
-import { useRouter } from "next/navigation";
-import {
-    Alert,
-    AlertDescription,
-    AlertIcon,
-    AlertTitle,
-    Spinner,
-    VStack,
-    useToast,
-    Link,
-    Button,
-    ButtonGroup,
-} from "@chakra-ui/react";
-import { RepeatClockIcon } from "@chakra-ui/icons";
+import { Link } from "@chakra-ui/next-js";
+import { Text, Spinner, VStack, useToast } from "@chakra-ui/react";
 
 import FileUploader from "./components/fileUploader";
 import NotebookDetailsEdit from "./components/notebookDetailsEdit";
@@ -23,6 +11,7 @@ import NotebookDetailsEdit from "./components/notebookDetailsEdit";
 import { FileType } from "@/definitions/FileType";
 import Notebook from "@/definitions/Notebook";
 import { parseFileEncodedNotebook } from "@/lib/notebooks";
+import SuccessMessage from "./components/successMessage";
 
 export default function FileUploadDialog({
     upload,
@@ -37,7 +26,6 @@ export default function FileUploadDialog({
     const [error, setError] = useState<string>();
 
     const toast = useToast();
-    const router = useRouter();
 
     const onSubmit = (notebook: Notebook) =>
         upload(notebook).then(({ success, error }) => {
@@ -50,75 +38,36 @@ export default function FileUploadDialog({
         setIsLoading(false);
         setSuccess(false);
         setError(undefined);
-        router.refresh();
     };
+
     if (error) {
         return (
-            <VStack align="center" justify="center">
-                <Alert
-                    status="error"
-                    variant="subtle"
-                    flexDirection="column"
-                    alignItems="center"
-                    justifyContent="center"
-                    textAlign="center"
-                >
-                    <AlertIcon boxSize="40px" mr={0} />
-                    <AlertTitle mt={4} mb={1} fontSize="lg">
-                        Upload failed!
-                    </AlertTitle>
-                    <AlertDescription maxWidth="sm">
-                        The files were not uploaded successfully. {error}
-                    </AlertDescription>
-                </Alert>
-                <ButtonGroup w="100%">
-                    <Button
-                        onClick={handleRefresh}
-                        border="2px"
-                        w="100%"
-                        leftIcon={<RepeatClockIcon />}
-                    >
-                        Retry
-                    </Button>
-                </ButtonGroup>
-            </VStack>
+            <SuccessMessage
+                status={"error"}
+                title="Upload failed!"
+                description={`The files were not uploaded successfully. ${error}`}
+                againLabel={"Retry"}
+                onRefresh={handleRefresh}
+            />
         );
     }
     if (success) {
         return (
-            <VStack align="center" justify="center">
-                <Alert
-                    status="success"
-                    variant="subtle"
-                    flexDirection="column"
-                    alignItems="center"
-                    justifyContent="center"
-                    textAlign="center"
-                >
-                    <AlertIcon boxSize="40px" mr={0} />
-                    <AlertTitle mt={4} mb={1} fontSize="lg">
-                        Upload successful!
-                    </AlertTitle>
-                    <AlertDescription maxWidth="sm">
+            <SuccessMessage
+                status={"success"}
+                title="Upload successful!"
+                description={
+                    <Text>
                         The files you uploaded have been stored successfully and
                         are now in the{" "}
                         <Link as={NextLink} href="/">
                             Gallery.
                         </Link>
-                    </AlertDescription>
-                </Alert>
-                <ButtonGroup w="100%">
-                    <Button
-                        onClick={handleRefresh}
-                        border="2px"
-                        w="100%"
-                        borderColor="green.500"
-                        leftIcon={<RepeatClockIcon />}
-                    >
-                        Upload another
-                    </Button>
-                </ButtonGroup>
-            </VStack>
+                    </Text>
+                }
+                againLabel={"Upload another"}
+                onRefresh={handleRefresh}
+            />
         );
     }
     if (isLoading) {
