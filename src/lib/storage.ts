@@ -53,7 +53,9 @@ export const addNotebook = async (notebook: Notebook): Promise<number> => {
     const insertNotebook = db.transaction((notebook: Notebook) => {
         return insert.run({
             ...notebook,
-            tags: serializeTags(notebook.tags),
+            author: notebook.author ? notebook.author : null,
+            image: notebook.image ? notebook.image : null,
+            tags: serializeTags(notebook.tags || []),
         });
     });
     const res = insertNotebook(notebook);
