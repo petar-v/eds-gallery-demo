@@ -72,15 +72,13 @@ async function getAllFileEntries(
 
         if (entry && entry.isFile) {
             // This is a file
-            await new Promise((resolve, reject) => {
+            await new Promise<void>((resolve, reject) => {
                 // Read file data and save to base64
                 (entry as FileSystemFileEntry).file((file) => {
                     const reader = new FileReader();
                     reader.readAsDataURL(file);
 
                     reader.onload = () => {
-                        // Do all the checks
-                        console.log(file.type);
                         if (
                             (maxSize == -1 || file.size < maxSize) &&
                             validateFileType(file, fileType)
@@ -99,7 +97,7 @@ async function getAllFileEntries(
                                 data: reader.result,
                             });
                         }
-                        resolve(0);
+                        resolve();
                     };
 
                     reader.onerror = reject;
@@ -201,19 +199,20 @@ export default function FileUploader({
             // Call this before processing the files
             onUploadStart();
 
-            const items: FileType[] = [];
-
-            [...e.target.files].forEach((file) => {
-                if (file) {
+            const promisedItems: Promise<FileType>[] = [...e.target.files]
+                .filter((f) => f)
+                .filter((file) => {
+                    return (
+                        (maxSize == -1 || file.size < maxSize) &&
+                        validateFileType(file, fileType)
+                    );
+                })
+                .map((file) => {
                     const reader = new FileReader();
                     reader.readAsDataURL(file);
-
-                    reader.onload = () => {
-                        if (
-                            (maxSize == -1 || file.size < maxSize) &&
-                            validateFileType(file, fileType)
-                        ) {
-                            items.push({
+                    return new Promise<FileType>((resolve, reject) => {
+                        reader.onload = () => {
+                            resolve({
                                 path: "/",
                                 type: "file",
                                 name: file.name,
@@ -221,17 +220,13 @@ export default function FileUploader({
                                     file.type || "application/octet-stream",
                                 data: reader.result || "",
                             });
-                        }
-                    };
-
-                    reader.onerror = (error) => {
-                        console.log(`Reader error`, error);
-                    };
-                }
-            });
+                        };
+                        reader.onerror = reject;
+                    });
+                });
 
             // Call this after the processing of the file is finished
-            onUploadEnd(items);
+            Promise.all(promisedItems).then(onUploadEnd).catch(console.error);
         }
     };
 
