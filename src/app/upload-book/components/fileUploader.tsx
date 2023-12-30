@@ -32,7 +32,11 @@ const validateFileType = (file: File, fileType: FileTypeProp): boolean => {
 
     if (file.type == "application/pdf" && fileType == "pdf") return true;
 
-    if (file.type === "" && fileType === "jupyter") return true;
+    if (
+        ["application/x-ipynb+json", ""].includes(file.type) &&
+        fileType === "jupyter"
+    )
+        return true;
 
     return file.type.split("/")[0] == fileType;
 };
@@ -210,7 +214,6 @@ export default function FileUploader({
                         reader.readAsDataURL(file);
 
                         reader.onload = () => {
-                            // Do all the checks
                             if (
                                 (maxSize == -1 || file.size < maxSize) &&
                                 validateFileType(file, fileType)
