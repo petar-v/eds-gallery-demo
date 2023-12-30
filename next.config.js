@@ -13,7 +13,7 @@ const nextConfig = {
     sassOptions: {
         includePaths: [path.join(__dirname, "styles")],
     },
-    webpack: (config) => {
+    webpack: (config, { isServer }) => {
         config.module.rules.push({
             test: /\.txt$/i,
             loader: "raw-loader",
@@ -26,6 +26,12 @@ const nextConfig = {
         config.externals = {
             "better-sqlite3": "commonjs better-sqlite3",
         };
+
+        if (isServer) {
+            config.resolve.fallback = {
+                fs: false,
+            };
+        }
 
         return config;
     },
