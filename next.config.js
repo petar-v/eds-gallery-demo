@@ -13,6 +13,18 @@ const nextConfig = {
     sassOptions: {
         includePaths: [path.join(__dirname, "styles")],
     },
+    async rewrites() {
+        return [
+            {
+                source: "/notebook-:slug",
+                destination: "/:slug",
+            },
+            {
+                source: "/:slug/:title",
+                destination: "/:slug",
+            },
+        ];
+    },
     webpack: (config, { isServer }) => {
         config.externals = {
             "better-sqlite3": "commonjs better-sqlite3",

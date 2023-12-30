@@ -38,6 +38,8 @@ export const clearDatabase = async () => {
 const serializeTags = (tags: string[]) => tags.map((t) => t.trim()).join(",");
 const deserializeTags = (tags: string) => tags.split(",").map((t) => t.trim());
 
+type NotebookEntry = Notebook & { tags: string };
+
 export const getNotebookPreviews = async (): Promise<NotebookMetadata[]> => {
     const db = await pool.acquire();
     const allBooks = db
@@ -49,6 +51,42 @@ export const getNotebookPreviews = async (): Promise<NotebookMetadata[]> => {
         ...(res as NotebookMetadata),
         tags: deserializeTags(res.tags),
     }));
+};
+
+export const getNotebookMetaData = async (
+    id: number,
+): Promise<NotebookMetadata | null> => {
+    const db = await pool.acquire();
+    const select = db.prepare(
+        `SELECT id, title, author, tags, image FROM ${TABLE} WHERE id = @id`,
+    );
+    const entry = select.get({ id }) as NotebookEntry;
+    db.release();
+
+    if (entry)
+        return {
+            ...(entry as NotebookMetadata),
+            tags: deserializeTags(entry.tags),
+        };
+    return null;
+};
+
+export const getNotebookData = async (id: number): Promise<Notebook | null> => {
+    const db = await pool.acquire();
+    const select = db.prepare(
+        `SELECT title, author, tags, data FROM ${TABLE} WHERE id = @id`,
+    );
+
+    const entry = select.get({ id }) as NotebookEntry;
+    db.release();
+
+    if (entry)
+        return {
+            ...(entry as Notebook),
+            tags: deserializeTags(entry.tags),
+        };
+
+    return null;
 };
 
 // TODO: add some type safety around IDs
