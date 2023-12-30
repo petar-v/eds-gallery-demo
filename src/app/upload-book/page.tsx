@@ -3,10 +3,8 @@ import { Metadata } from "next";
 import { Box, Heading, VStack } from "@chakra-ui/react";
 import FileUploadDialog from "./fileUploadDialog";
 
-import { FileType } from "@/definitions/FileType";
-import { addNotebook } from "@/lib/storage";
-import { parseFileEncodedNotebook } from "@/lib/notebooks";
 import Notebook from "@/definitions/Notebook";
+import { addNotebook } from "@/lib/storage";
 
 export const metadata: Metadata = {
     title: "Upload a new EDS Book",
@@ -16,31 +14,21 @@ export const metadata: Metadata = {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export default function Page() {
-    async function upload(files: FileType[]) {
+    async function upload(
+        notebook: Notebook,
+    ): Promise<{ success: boolean; error?: string }> {
         "use server";
-        console.log(files.map((file) => file.name));
-
-        // TODO: add in parallel
-        files
-            .filter((file) => file.data !== null)
-            .forEach(async (file) => {
-                try {
-                    const notebook = await parseFileEncodedNotebook(
-                        file.data || "",
-                    );
-                    await addNotebook(notebook);
-                } catch (err) {
-                    // console.error("Failed to parse notebook " + file.name, err);
-                }
-            });
-        // TODO: error handling
-        return { success: true };
-    }
-
-    async function mockUpload(notebook: Notebook) {
-        "use server";
-        console.log("New notebook", notebook.title, notebook.tags.join(", "));
-        return { success: true, error: "" };
+        try {
+            await addNotebook(notebook);
+            await sleep(4000);
+            // FIXME: remove the sleep
+            return { success: true };
+        } catch (err) {
+            return {
+                success: false,
+                error: "The notebook could not be saved to the database.",
+            };
+        }
     }
 
     return (
@@ -48,6 +36,7 @@ export default function Page() {
             <Box py={5}>
                 <VStack align="center" spacing={2}>
                     <Heading>Upload a Jupyter Notebook</Heading>
+                    {process.env.APP_ROOT}
                     <Box
                         maxW="lg"
                         w="full"
@@ -56,7 +45,7 @@ export default function Page() {
                         rounded="md"
                         p={5}
                     >
-                        <FileUploadDialog upload={mockUpload} />
+                        <FileUploadDialog upload={upload} />
                     </Box>
                 </VStack>
             </Box>

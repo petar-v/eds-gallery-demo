@@ -29,7 +29,7 @@ export default function FileUploadDialog({
 }: {
     upload: (
         notebook: Notebook,
-    ) => Promise<{ success: boolean; error: string | undefined }>;
+    ) => Promise<{ success: boolean; error?: string }>;
 }) {
     const [notebook, setNotebook] = useState<Notebook>();
     const [isLoading, setIsLoading] = useState(false);

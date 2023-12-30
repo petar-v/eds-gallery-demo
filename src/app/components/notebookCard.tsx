@@ -1,6 +1,13 @@
-import { Heading, CardHeader, Card, Badge, Flex } from "@chakra-ui/react";
+import {
+    Heading,
+    CardHeader,
+    Card,
+    Badge,
+    Flex,
+    CardBody,
+} from "@chakra-ui/react";
 
-import Notebook from "@/definitions/Notebook";
+import { NotebookMetadata } from "@/definitions/Notebook";
 import { CardFooter } from "react-bootstrap";
 import ColorfulTag from "@/components/ColorfulTag";
 
@@ -8,8 +15,8 @@ export default function NotebookCard({
     notebook,
     onClick,
 }: {
-    notebook: Notebook;
-    onClick?: (n: Notebook) => void;
+    notebook: NotebookMetadata;
+    onClick?: (n: NotebookMetadata) => void;
 }) {
     return (
         <Card
@@ -21,6 +28,7 @@ export default function NotebookCard({
             <CardHeader>
                 <Heading size="md">{notebook.title}</Heading>
             </CardHeader>
+            <CardBody></CardBody>
             <CardFooter>
                 <Flex direction="row" p={3} gap={2} wrap="wrap">
                     {notebook.tags.map((tag, i) => (
