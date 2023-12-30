@@ -32,24 +32,28 @@ const readNotebookFiles = (directory: string): string[] => {
     return notebookFiles;
 };
 
-configureDatabase().then(async () => {
-    console.log("Ran migrations.");
+configureDatabase()
+    .then(async () => {
+        console.log("Ran migrations.");
 
-    await clearDatabase();
-    console.log("Cleaned up old records.");
+        await clearDatabase();
+        console.log("Cleaned up old records.");
 
-    const insertPromises = readNotebookFiles(sampleDataDir).map(
-        async (notebookJson: string) => {
-            const notebook = await parseNotebook(notebookJson);
-            return addNotebook(notebook).then((id) => {
-                console.log(`Inserted book ${id}: ${notebook.title}`);
-            });
-        },
-    );
+        const insertPromises = readNotebookFiles(sampleDataDir).map(
+            async (notebookJson: string) => {
+                const notebook = await parseNotebook(notebookJson);
+                return addNotebook(notebook).then((id) => {
+                    console.log(`Inserted book ${id}: ${notebook.title}`);
+                });
+            },
+        );
 
-    await Promise.all(insertPromises);
+        await Promise.all(insertPromises);
 
-    console.log("Closing database...");
-    disconnectDatabase();
-    console.log("Done!");
-});
+        console.log("Closing database...");
+        disconnectDatabase();
+        console.log("Done!");
+    })
+    .catch((err) => {
+        console.error("Failed to configure the database", err);
+    });
