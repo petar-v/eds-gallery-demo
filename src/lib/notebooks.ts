@@ -36,7 +36,6 @@ export const parseNotebook = async (data: string): Promise<Notebook> => {
         .join("");
 
     const htmlString = await parse(mdCells || "");
-    console.log(htmlString);
 
     const $ = load(htmlString);
 

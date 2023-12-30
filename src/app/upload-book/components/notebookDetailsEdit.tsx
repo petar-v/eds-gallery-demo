@@ -10,6 +10,7 @@ import {
     Button,
     Flex,
     Stack,
+    Image,
 } from "@chakra-ui/react";
 import { StarIcon } from "@chakra-ui/icons";
 
@@ -86,7 +87,7 @@ export default function NotebookDetailsEdit({
                                 onUploadStart={() => {}}
                                 preview={
                                     field.value ? (
-                                        <img
+                                        <Image
                                             alt="Notebook preview image"
                                             src={field.value}
                                         />
