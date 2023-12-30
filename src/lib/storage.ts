@@ -1,4 +1,7 @@
 import { Pool, PoolConnection } from "better-sqlite-pool";
+import { migrate } from "@blackglory/better-sqlite3-migrations";
+import { map } from "extra-promise";
+import { findMigrationFilenames, readMigrationFile } from "migration-files";
 // could also use typeorm.io for the actual product if not going with a off-the-shelf cms
 
 import Notebook, { NotebookMetadata } from "@/definitions/Notebook";
@@ -12,8 +15,13 @@ const pool = new Pool(DATABASE_FILE);
 
 // Need to call this once on server setup
 export const configureDatabase = async () => {
-    const db = await pool.acquire();
+    const filenames = await findMigrationFilenames(MIGRATIONS_DIR);
+    const migrations = await map(filenames, readMigrationFile);
+    console.log("Migrations:");
+    migrations.forEach((m) => console.log(m.version, m.name));
     // run migrations
+    const db = await pool.acquire();
+    migrate(db, migrations);
     db.release();
 };
 
