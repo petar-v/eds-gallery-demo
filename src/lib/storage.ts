@@ -17,8 +17,8 @@ const pool = new Pool(DATABASE_FILE);
 export const configureDatabase = async () => {
     const filenames = await findMigrationFilenames(MIGRATIONS_DIR);
     const migrations = await map(filenames, readMigrationFile);
-    console.log("Migrations:");
-    migrations.forEach((m) => console.log(m.version, m.name));
+    console.log("Migrations detected:");
+    migrations.forEach((m) => console.log("\t", m.version, m.name));
     // run migrations
     const db = await pool.acquire();
     migrate(db, migrations);
