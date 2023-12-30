@@ -11,6 +11,7 @@ module.exports = {
         project: true,
         tsconfigRootDir: __dirname,
     },
+    ignorePatterns: ["next.config.js"],
     rules: {
         "chakra-ui/props-order": 2,
         "chakra-ui/props-shorthand": 2,
