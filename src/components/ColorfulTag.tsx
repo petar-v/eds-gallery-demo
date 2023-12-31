@@ -31,12 +31,21 @@ export const tagColor = (tagLabel: string) => {
 const ColorfulTag = ({
     tag,
     size,
+    borderRadius,
+    variant,
 }: {
     tag: string;
     size?: "sm" | "md" | "lg";
+    borderRadius?: "full" | "none";
+    variant?: "subtle" | "solid" | "outline";
 }) => {
     return (
-        <Tag colorScheme={tagColor(tag)} size={size || "md"}>
+        <Tag
+            borderRadius={borderRadius}
+            colorScheme={tagColor(tag)}
+            size={size || "md"}
+            variant={variant}
+        >
             {tag}
         </Tag>
     );

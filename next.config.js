@@ -11,6 +11,7 @@ const nextConfig = {
         webpackBuildWorker: true,
         instrumentationHook: true,
         typedRoutes: true,
+        newNextLinkBehavior: true,
         serverActions: {
             bodySizeLimit: "15mb",
         },
@@ -43,6 +44,9 @@ const nextConfig = {
 
         return config;
     },
+    // to speed up building
+    optimizeFonts: false, // Disable font optimization
+    swcMinify: true,
 };
 
 module.exports = withRoutes(nextConfig);

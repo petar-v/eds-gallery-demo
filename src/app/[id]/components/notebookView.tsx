@@ -20,7 +20,6 @@ const sanitizerDomPurify = (html: string): string => {
     const purify = DOMPurify();
     purify.addHook("afterSanitizeAttributes", function (node) {
         if (node.tagName === "A") {
-            console.log("ADD ATTR");
             node.setAttribute("target", "_blank");
             node.setAttribute("rel", "noreferrer");
         }
