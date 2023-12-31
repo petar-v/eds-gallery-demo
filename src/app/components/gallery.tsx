@@ -17,6 +17,9 @@ import { convert as slugify } from "url-slug";
 import { NotebookMetadata } from "@/definitions/Notebook";
 import NotebookCard from "./notebookCard";
 
+const notebookSlug = (title: string) =>
+    slugify(title, { camelCase: true }).substring(0, 150);
+
 export default function Gallery({
     notebooks,
 }: {
@@ -25,19 +28,11 @@ export default function Gallery({
     const router = useRouter();
 
     const openNotebook = ({ id, title }: NotebookMetadata) => {
-        const slug = slugify(title, { camelCase: true });
-        router.push(`/${id}/${slug}`);
+        router.push(`/${id}/${notebookSlug(title)}`);
     };
 
     return (
-        <VStack
-            align="center"
-            direction="column"
-            h="100vh"
-            p={5}
-            bg="gray.100"
-            spacing={4}
-        >
+        <VStack align="center" direction="column" p={5} spacing={4}>
             <Heading>EDS Books Gallery</Heading>
             <Link
                 href="/upload-book"
@@ -47,7 +42,7 @@ export default function Gallery({
                 Upload a book
             </Link>
 
-            <Box w="100%" bg="white" rounded="md">
+            <Box w="full" bg="white" rounded="md">
                 <InputGroup>
                     <InputLeftElement pointerEvents="none">
                         <Search2Icon boxSize="1.2em" color="gray.300" />
@@ -64,6 +59,7 @@ export default function Gallery({
             <p>Number of Notebooks: {notebooks.length}</p>
             <SimpleGrid
                 templateColumns="repeat(auto-fill, minmax(200px, 1fr))"
+                w="full"
                 spacing={4}
             >
                 {notebooks.map((book, i) => (
