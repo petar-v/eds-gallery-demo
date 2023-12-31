@@ -6,8 +6,10 @@ export type NotebookMetadata = {
     image?: string; // this is a base64 encoded image or src
 };
 
+export type NotebookData = string;
+
 type Notebook = NotebookMetadata & {
-    data: string; // this is the notebook itself
+    data: NotebookData; // this is the notebook itself
 };
 
 export default Notebook;

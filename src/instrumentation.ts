@@ -2,7 +2,7 @@ import { configureDatabase, disconnectDatabase } from "./lib/storage";
 
 export async function register() {
     console.log("Configuring the database...");
-    configureDatabase();
+    await configureDatabase();
     console.log("Database configured!");
 
     const shutdown = (code: number) => {

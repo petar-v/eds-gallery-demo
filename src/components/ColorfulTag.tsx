@@ -28,8 +28,18 @@ export const tagColor = (tagLabel: string) => {
     return colors[hashString % colors.length];
 };
 
-const ColorfulTag = ({ tag }: { tag: string }) => {
-    return <Tag colorScheme={tagColor(tag)}>{tag}</Tag>;
+const ColorfulTag = ({
+    tag,
+    size,
+}: {
+    tag: string;
+    size?: "sm" | "md" | "lg";
+}) => {
+    return (
+        <Tag colorScheme={tagColor(tag)} size={size || "md"}>
+            {tag}
+        </Tag>
+    );
 };
 
 export default ColorfulTag;

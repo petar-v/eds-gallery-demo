@@ -4,6 +4,8 @@ import { Providers } from "./providers";
 
 import "@/styles/globals.scss";
 
+import React from "react";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -20,7 +22,12 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={inter.className}>
-                <Providers>{children}</Providers>
+                <Providers>
+                    {/* TODO: add header with some navigation */}
+                    {children}
+                    {/* TODO: add a footer with some branding */}
+                    {/* <footer>Created by Petar Vasilev</footer> */}
+                </Providers>
             </body>
         </html>
     );

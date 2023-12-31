@@ -1,3 +1,5 @@
+import React from "react";
+
 import { Box, Text, Stack, ColorProps } from "@chakra-ui/react";
 import { AttachmentIcon } from "@chakra-ui/icons";
 import { FileType } from "@/definitions/FileType";
@@ -32,7 +34,11 @@ const validateFileType = (file: File, fileType: FileTypeProp): boolean => {
 
     if (file.type == "application/pdf" && fileType == "pdf") return true;
 
-    if (file.type === "" && fileType === "jupyter") return true;
+    if (
+        ["application/x-ipynb+json", ""].includes(file.type) &&
+        fileType === "jupyter"
+    )
+        return true;
 
     return file.type.split("/")[0] == fileType;
 };
@@ -52,8 +58,8 @@ async function getAllFileEntries(
     maxSize: number,
     fileType: FileTypeProp,
 ): Promise<FileType[]> {
-    let fileEntries: FileType[] = [];
-    let queue = [];
+    const fileEntries: FileType[] = [];
+    const queue = [];
 
     for (let i = 0; i < dataTransferItemList.length; i++) {
         // Note webkitGetAsEntry a non-standard feature and may change
@@ -62,19 +68,17 @@ async function getAllFileEntries(
     }
 
     while (queue.length > 0) {
-        let entry = queue.shift();
+        const entry = queue.shift();
 
         if (entry && entry.isFile) {
             // This is a file
-            await new Promise((resolve, reject) => {
+            await new Promise<void>((resolve, reject) => {
                 // Read file data and save to base64
                 (entry as FileSystemFileEntry).file((file) => {
                     const reader = new FileReader();
                     reader.readAsDataURL(file);
 
                     reader.onload = () => {
-                        // Do all the checks
-                        console.log(file.type);
                         if (
                             (maxSize == -1 || file.size < maxSize) &&
                             validateFileType(file, fileType)
@@ -93,7 +97,7 @@ async function getAllFileEntries(
                                 data: reader.result,
                             });
                         }
-                        resolve(0);
+                        resolve();
                     };
 
                     reader.onerror = reject;
@@ -109,7 +113,7 @@ async function getAllFileEntries(
                 data: "",
             });
 
-            let reader = (entry as FileSystemDirectoryEntry).createReader();
+            const reader = (entry as FileSystemDirectoryEntry).createReader();
             queue.push(...(await readAllDirectoryEntries(reader)));
         }
     }
@@ -121,7 +125,7 @@ async function getAllFileEntries(
 async function readAllDirectoryEntries(
     directoryReader: FileSystemDirectoryReader,
 ) {
-    let entries = [];
+    const entries = [];
     let readEntries: any = await readEntriesPromise(directoryReader);
 
     while (readEntries.length > 0) {
@@ -186,9 +190,7 @@ export default function FileUploader({
     onUploadEnd: (files: FileType[]) => void;
     preview?: React.ReactNode;
 }) {
-    const onFileSelectionChange: ChangeEventHandler<HTMLInputElement> = async (
-        e,
-    ) => {
+    const onFileSelectionChange: ChangeEventHandler<HTMLInputElement> = (e) => {
         // Prevent default browser action for file upload
         e.preventDefault();
         e.stopPropagation();
@@ -197,65 +199,48 @@ export default function FileUploader({
             // Call this before processing the files
             onUploadStart();
 
-            let items: FileType[] = [];
-
-            for (var i = 0; i < e.target.files.length; i++) {
-                // This is a file (cannot upload folder via input tag)
-                await new Promise((resolve, reject) => {
-                    // Read file data and save to base64
-                    const file = e.target.files?.item(i);
-
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.readAsDataURL(file);
-
+            const promisedItems: Promise<FileType>[] = [...e.target.files]
+                .filter((f) => f)
+                .filter((file) => {
+                    return (
+                        (maxSize == -1 || file.size < maxSize) &&
+                        validateFileType(file, fileType)
+                    );
+                })
+                .map((file) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    return new Promise<FileType>((resolve, reject) => {
                         reader.onload = () => {
-                            // Do all the checks
-                            if (
-                                (maxSize == -1 || file.size < maxSize) &&
-                                validateFileType(file, fileType)
-                            ) {
-                                items.push({
-                                    path: "/",
-                                    type: "file",
-                                    name: file.name,
-                                    mimeType:
-                                        file.type || "application/octet-stream",
-                                    data: reader.result || "",
-                                });
-                            }
-                            resolve(0);
+                            resolve({
+                                path: "/",
+                                type: "file",
+                                name: file.name,
+                                mimeType:
+                                    file.type || "application/octet-stream",
+                                data: reader.result || "",
+                            });
                         };
-
                         reader.onerror = reject;
-                    }
+                    });
                 });
-            }
 
             // Call this after the processing of the file is finished
-            onUploadEnd(items);
+            Promise.all(promisedItems).then(onUploadEnd).catch(console.error);
         }
     };
 
     return (
         <Stack
-            backgroundColor={backgroundColor}
-            transition="opacity 250ms ease-in-out"
-            direction="column"
-            spacing="1rem"
-            padding="1rem 4rem"
             alignItems="center"
+            direction="column"
+            p="1rem 4rem"
             textAlign="center"
             border="1px solid"
             borderColor="gray.100"
             borderRadius="md"
-            onDragOver={(e) => {
-                // Prevent default browser action for file drag
-                e.stopPropagation();
-                e.preventDefault();
-
-                showOver && (e.currentTarget.style.opacity = "0.6");
-            }}
+            transition="opacity 250ms ease-in-out"
+            bgColor={backgroundColor}
             onDragLeave={(e) => {
                 // Prevent default browser action for file drag
                 e.stopPropagation();
@@ -263,7 +248,14 @@ export default function FileUploader({
 
                 showOver && (e.currentTarget.style.opacity = "1");
             }}
-            onDrop={async (e) => {
+            onDragOver={(e) => {
+                // Prevent default browser action for file drag
+                e.stopPropagation();
+                e.preventDefault();
+
+                showOver && (e.currentTarget.style.opacity = "0.6");
+            }}
+            onDrop={(e) => {
                 // Prevent default browser action for file drop
                 e.stopPropagation();
                 e.preventDefault();
@@ -275,29 +267,20 @@ export default function FileUploader({
                     onUploadStart();
 
                     // Process the files
-                    let items = await getAllFileEntries(
-                        e.dataTransfer.items,
-                        maxSize,
-                        fileType,
-                    );
-
-                    // Call this after the processing of the file is finished
-                    onUploadEnd(items);
+                    getAllFileEntries(e.dataTransfer.items, maxSize, fileType)
+                        .then(onUploadEnd)
+                        .catch(console.error);
                 }
             }}
+            spacing="1rem"
         >
-            <Box
-                padding="1rem"
-                backgroundColor={secondaryColor}
-                borderRadius="10px"
-                margin="auto"
-            >
+            <Box m="auto" p="1rem" borderRadius="10px" bgColor={secondaryColor}>
                 {preview ? preview : <AttachmentIcon />}
             </Box>
             <Stack direction="column" spacing="0.5rem">
                 <Box>
                     <Text
-                        position="relative"
+                        pos="relative"
                         display="inline"
                         color={primaryColor}
                         fontWeight="bold"

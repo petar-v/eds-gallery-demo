@@ -17,16 +17,16 @@ const pool = new Pool(DATABASE_FILE);
 export const configureDatabase = async () => {
     const filenames = await findMigrationFilenames(MIGRATIONS_DIR);
     const migrations = await map(filenames, readMigrationFile);
-    console.log("Migrations:");
-    migrations.forEach((m) => console.log(m.version, m.name));
+    console.log("Migrations detected:");
+    migrations.forEach((m) => console.log("\t", m.version, m.name));
     // run migrations
     const db = await pool.acquire();
     migrate(db, migrations);
     db.release();
 };
 
-export const disconnectDatabase = async () => {
-    pool.close();
+export const disconnectDatabase = () => {
+    return pool.close();
 };
 
 export const clearDatabase = async () => {
@@ -38,17 +38,61 @@ export const clearDatabase = async () => {
 const serializeTags = (tags: string[]) => tags.map((t) => t.trim()).join(",");
 const deserializeTags = (tags: string) => tags.split(",").map((t) => t.trim());
 
+type NotebookEntry = Notebook & { tags: string };
+
+const notebookEntryToMetadata = (entry: NotebookEntry) => {
+    const undefineEmptyVal = (value: string | undefined) =>
+        [null, ""].includes(value || null) ? undefined : value;
+    return {
+        ...(entry as NotebookMetadata),
+        tags: deserializeTags(entry.tags),
+        author: undefineEmptyVal(entry.author),
+        image: undefineEmptyVal(entry.image),
+    };
+};
+
 export const getNotebookPreviews = async (): Promise<NotebookMetadata[]> => {
     const db = await pool.acquire();
-    let allBooks = db
+    const allBooks = db
         .prepare(`SELECT id, title, author, tags, image FROM ${TABLE}`)
         .all();
     db.release();
 
-    return allBooks.map((res: any) => ({
-        ...(res as NotebookMetadata),
-        tags: deserializeTags(res.tags),
-    }));
+    return allBooks.map((res: unknown) =>
+        notebookEntryToMetadata(res as NotebookEntry),
+    );
+};
+
+export const getNotebookMetaData = async (
+    id: number,
+): Promise<NotebookMetadata | null> => {
+    const db = await pool.acquire();
+    const select = db.prepare(
+        `SELECT id, title, author, tags, image FROM ${TABLE} WHERE id = @id`,
+    );
+    const entry = select.get({ id }) as NotebookEntry;
+    db.release();
+
+    if (entry) return notebookEntryToMetadata(entry);
+    return null;
+};
+
+export const getNotebookData = async (id: number): Promise<Notebook | null> => {
+    const db = await pool.acquire();
+    const select = db.prepare(
+        `SELECT title, author, tags, data FROM ${TABLE} WHERE id = @id`,
+    );
+
+    const entry = select.get({ id }) as NotebookEntry;
+    db.release();
+
+    if (entry)
+        return {
+            ...(entry as Notebook),
+            ...notebookEntryToMetadata(entry ),
+        };
+
+    return null;
 };
 
 // TODO: add some type safety around IDs
@@ -58,11 +102,13 @@ export const addNotebook = async (notebook: Notebook): Promise<number> => {
         `INSERT INTO ${TABLE} (title, author, tags, image, data) VALUES (@title, @author, @tags, @image, @data)`,
     );
 
+    const isEmptyOrNull = (str: string | undefined) =>
+        [undefined, null, ""].includes(str?.trim());
     const insertNotebook = db.transaction((notebook: Notebook) => {
         return insert.run({
             ...notebook,
-            author: notebook.author ? notebook.author : null,
-            image: notebook.image ? notebook.image : null,
+            author: isEmptyOrNull(notebook.author) ? notebook.author : null,
+            image: isEmptyOrNull(notebook.image) ? notebook.image : null,
             tags: serializeTags(notebook.tags || []),
         });
     });
@@ -83,16 +129,4 @@ export const removeNotebookByID = async (id: number): Promise<number> => {
 export const removeNotebook = async (nb: NotebookMetadata): Promise<number> => {
     if (nb.id) return removeNotebookByID(nb.id);
     throw new Error(`Notebook ID not provided for ${nb.title}`);
-};
-
-const notebooks: { [hash in string]: Notebook } = {};
-
-export const searchNotebooks = async (query: string): Promise<Notebook[]> => {
-    const byTitle = Object.values(notebooks).filter((notebook) =>
-        notebook.title.includes(query),
-    );
-
-    // TODO: search by tags
-    // dedupe
-    return [...byTitle];
 };

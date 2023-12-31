@@ -11,18 +11,15 @@ export const metadata: Metadata = {
     description: "Upload a new EDS Book",
 };
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
 export default function Page() {
     async function upload(
         notebook: Notebook,
-    ): Promise<{ success: boolean; error?: string }> {
+    ): Promise<{ success: boolean; error?: string; id?: number }> {
         "use server";
         try {
-            await addNotebook(notebook);
-            await sleep(4000);
-            // FIXME: remove the sleep
-            return { success: true };
+            const id = await addNotebook(notebook);
+            console.log(`Added a new notebook with ID ${id}`);
+            return { success: true, id };
         } catch (err) {
             return {
                 success: false,
@@ -32,23 +29,22 @@ export default function Page() {
     }
 
     return (
-        <main>
-            <Box py={5}>
-                <VStack align="center" spacing={2}>
-                    <Heading>Upload a Jupyter Notebook</Heading>
-                    {process.env.APP_ROOT}
-                    <Box
-                        maxW="lg"
-                        w="full"
-                        bg="white"
-                        boxShadow="lg"
-                        rounded="md"
-                        p={5}
-                    >
-                        <FileUploadDialog upload={upload} />
-                    </Box>
-                </VStack>
-            </Box>
-        </main>
+        <>
+            <header>
+                <Heading>Upload a Jupyter Notebook</Heading>
+            </header>
+            <main>
+                <Box
+                    w="full"
+                    maxW="lg"
+                    p={5}
+                    bg="white"
+                    shadow="lg"
+                    rounded="md"
+                >
+                    <FileUploadDialog upload={upload} />
+                </Box>
+            </main>
+        </>
     );
 }
