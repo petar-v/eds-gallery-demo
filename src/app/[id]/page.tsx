@@ -1,6 +1,12 @@
-import { getNotebookData, getNotebookMetaData } from "@/lib/storage";
 import { notFound } from "next/navigation";
+
 import type { Metadata, ResolvingMetadata } from "next";
+
+import { Box, Heading } from "@chakra-ui/react";
+
+import { getNotebookData, getNotebookMetaData } from "@/lib/storage";
+
+import NotebookView from "./components/notebookView";
 
 type Props = {
     params: { id: number };
@@ -52,5 +58,24 @@ export default async function Page({ params: { id } }: Props) {
         return notFound();
     }
     // TODO: add error boundaries
-    return <main>{notebook.title}</main>;
+    return (
+        <>
+            {/* <header>
+                <Heading>{notebook.title}</Heading>
+            </header> */}
+            <main>
+                <Box
+                    w="full"
+                    maxW="3xl"
+                    p={5}
+                    bg="white"
+                    shadow="lg"
+                    rounded="md"
+                >
+                    {/* TODO: add suspense */}
+                    <NotebookView notebook={notebook} />
+                </Box>
+            </main>
+        </>
+    );
 }

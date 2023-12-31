@@ -28,23 +28,22 @@ export default function Page() {
     }
 
     return (
-        <main>
-            <Box py={5}>
-                <VStack align="center" spacing={2}>
-                    <Heading>Upload a Jupyter Notebook</Heading>
-                    {process.env.APP_ROOT}
-                    <Box
-                        w="full"
-                        maxW="lg"
-                        p={5}
-                        bg="white"
-                        shadow="lg"
-                        rounded="md"
-                    >
-                        <FileUploadDialog upload={upload} />
-                    </Box>
-                </VStack>
-            </Box>
-        </main>
+        <>
+            <header>
+                <Heading>Upload a Jupyter Notebook</Heading>
+            </header>
+            <main>
+                <Box
+                    w="full"
+                    maxW="lg"
+                    p={5}
+                    bg="white"
+                    shadow="lg"
+                    rounded="md"
+                >
+                    <FileUploadDialog upload={upload} />
+                </Box>
+            </main>
+        </>
     );
 }
