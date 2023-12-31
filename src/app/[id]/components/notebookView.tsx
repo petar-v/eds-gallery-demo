@@ -1,15 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useEffect } from "react";
 
 import DOMPurify from "dompurify";
-import sanitizeHtml from "sanitize-html";
+// import sanitizeHtml from "sanitize-html";
 
 import { IpynbRenderer } from "react-ipynb-renderer";
 
 import Notebook from "@/definitions/Notebook";
-
-import ReactDOM from "react-dom";
 
 import "react-ipynb-renderer/dist/styles/default.css";
 
@@ -35,32 +33,49 @@ const sanitizerDomPurify = (html: string): string => {
     });
 };
 
-const sanitizerHtml = (html: string): string => {
-    return sanitizeHtml(html, {
-        transformTags: {
-            a: sanitizeHtml.simpleTransform("a", {
-                target: "_blank",
-                rel: "noreferrer",
-            }),
-        },
-        allowedAttributes: {},
-    });
-};
+// const sanitizerHtml = (html: string): string => {
+//     return sanitizeHtml(html, {
+//         transformTags: {
+//             a: sanitizeHtml.simpleTransform("a", {
+//                 target: "_blank",
+//                 rel: "noreferrer",
+//             }),
+//         },
+//         allowedAttributes: {},
+//     });
+// };
 
-const SANITIZER: "sanitize-html" | "dompurify" = "dompurify";
+// const SANITIZER: "sanitize-html" | "dompurify" = "dompurify";
 
 export default function NotebookView({ notebook }: { notebook: Notebook }) {
-    const renderedIpynv = (
-        <IpynbRenderer
-            ipynb={JSON.parse(notebook.data)}
-            seqAsExecutionCount={true}
-            syntaxTheme="prism" // or duotoneSpace
-            htmlFilter={
-                SANITIZER === "dompurify" ? sanitizerDomPurify : sanitizerHtml
-            }
-            // TODO: make the themes switchable
-        />
-    );
+    const articleRef = useRef<HTMLElement>(null);
 
-    return <>{renderedIpynv}</>;
+    useEffect(() => {
+        const article = articleRef.current;
+        if (article) {
+            console.log("ARTICLE", article);
+            article.querySelectorAll("h1,h2,h3,h4").forEach((heading, i) => {
+                heading.id = `heading-${i}`;
+                console.log(
+                    `${heading.nodeName}:`,
+                    heading.id,
+                    heading.innerHTML,
+                );
+            });
+        }
+    }, []);
+
+    return (
+        <>
+            <article ref={articleRef}>
+                <IpynbRenderer
+                    ipynb={JSON.parse(notebook.data)}
+                    seqAsExecutionCount={true}
+                    syntaxTheme="prism" // or duotoneSpace
+                    htmlFilter={sanitizerDomPurify}
+                    // TODO: make the themes switchable
+                />
+            </article>
+        </>
+    );
 }
