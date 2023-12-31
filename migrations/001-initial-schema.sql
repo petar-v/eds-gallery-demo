@@ -7,7 +7,7 @@ CREATE TABLE
         title TEXT NOT NULL,
         author TEXT,
         tags TEXT,
-        image BLOB,
+        image TEXT, -- FIXME: This could be a blob but no point in dealing with atob() right now.
         data JSON NOT NULL,
         CONSTRAINT unique_title_author_tags UNIQUE (title, author, tags)
     );

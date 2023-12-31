@@ -7,6 +7,7 @@
         "start": "next start",
         "lint": "next lint",
         "seed": "npx ts-node -O '{\"module\":\"commonjs\"}' seed.ts",
+        "clear-db": "rm notebooks.db",
         "cf-deploy": "npx @cloudflare/next-on-pages@1",
         "run-password-page": "npx wrangler pages dev build -b CFP_PASSWORD=test",
         "eslint": "eslint --fix",
