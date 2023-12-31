@@ -50,7 +50,7 @@ export default function NotebookCard({
     highlight?: string;
 }) {
     const { title, author, tags, image } = notebook;
-    const query = highlight?.split(" ");
+    const query = highlight?.replace(/[^a-zA-Z ]/g, " ").split(" ");
 
     return (
         <LinkBox as="article" maxW="sm" rounded="md">
