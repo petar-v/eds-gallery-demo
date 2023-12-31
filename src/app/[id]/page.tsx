@@ -66,7 +66,7 @@ export default async function Page({ params: { id } }: Props) {
             <main>
                 <Box
                     w="full"
-                    maxW="3xl"
+                    maxW="4xl"
                     p={5}
                     bg="white"
                     shadow="lg"
