@@ -19,11 +19,13 @@ const SuccessMessage = ({
     description,
     onRefresh,
     againLabel,
+    extraButtons,
 }: {
     status: "error" | "success";
     title: string;
     description: string | React.ReactNode;
     againLabel: string;
+    extraButtons?: React.ReactNode;
     onRefresh: () => void;
 }) => (
     <VStack align="center" justify="center">
@@ -45,12 +47,13 @@ const SuccessMessage = ({
             <Button
                 w="100%"
                 border="2px"
-                borderColor={status === "success" ? "green.500" : undefined}
+                borderColor={status === "success" ? "teal.500" : undefined}
                 leftIcon={<RepeatClockIcon />}
                 onClick={onRefresh}
             >
                 {againLabel}
             </Button>
+            {extraButtons}
         </ButtonGroup>
     </VStack>
 );

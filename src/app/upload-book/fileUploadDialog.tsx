@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
+
 import NextLink from "next/link";
 import { Link } from "@chakra-ui/next-js";
-import { Text, Spinner, VStack, useToast } from "@chakra-ui/react";
+
+import { Text, Spinner, VStack, useToast, Button } from "@chakra-ui/react";
+import { ExternalLinkIcon } from "@chakra-ui/icons";
 
 import FileUploader from "./components/fileUploader";
 import NotebookDetailsEdit from "./components/notebookDetailsEdit";
@@ -18,7 +21,7 @@ export default function FileUploadDialog({
 }: {
     upload: (
         notebook: Notebook,
-    ) => Promise<{ success: boolean; error?: string }>;
+    ) => Promise<{ success: boolean; error?: string; id?: number }>;
 }) {
     const [notebook, setNotebook] = useState<Notebook>();
     const [isLoading, setIsLoading] = useState(false);
@@ -28,9 +31,16 @@ export default function FileUploadDialog({
     const toast = useToast();
 
     const onSubmit = (notebook: Notebook) =>
-        upload(notebook).then(({ success, error }) => {
-            if (success) setSuccess(true);
-            else setError(error);
+        upload(notebook).then(({ success, error, id }) => {
+            if (success) {
+                setSuccess(true);
+                setNotebook({
+                    ...notebook,
+                    id,
+                });
+            } else {
+                setError(error);
+            }
         });
 
     const handleRefresh = () => {
@@ -52,6 +62,18 @@ export default function FileUploadDialog({
         );
     }
     if (success) {
+        const extraButtons = notebook?.id && (
+            <Button
+                w="100%"
+                colorScheme="teal"
+                leftIcon={<ExternalLinkIcon />}
+                onClick={() => {
+                    alert("open" + notebook.id);
+                }}
+            >
+                View
+            </Button>
+        );
         return (
             <SuccessMessage
                 status={"success"}
@@ -67,6 +89,7 @@ export default function FileUploadDialog({
                 }
                 againLabel={"Upload another"}
                 onRefresh={handleRefresh}
+                extraButtons={extraButtons}
             />
         );
     }

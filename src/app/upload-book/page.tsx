@@ -14,11 +14,12 @@ export const metadata: Metadata = {
 export default function Page() {
     async function upload(
         notebook: Notebook,
-    ): Promise<{ success: boolean; error?: string }> {
+    ): Promise<{ success: boolean; error?: string; id?: number }> {
         "use server";
         try {
-            await addNotebook(notebook);
-            return { success: true };
+            const id = await addNotebook(notebook);
+            console.log(`Added a new notebook with ID ${id}`);
+            return { success: true, id };
         } catch (err) {
             return {
                 success: false,

@@ -12,13 +12,10 @@ import {
     SimpleGrid,
 } from "@chakra-ui/react";
 import { Search2Icon } from "@chakra-ui/icons";
-import { convert as slugify } from "url-slug";
 
 import { NotebookMetadata } from "@/definitions/Notebook";
 import NotebookCard from "./notebookCard";
-
-const notebookSlug = (title: string) =>
-    slugify(title, { camelCase: true }).substring(0, 150);
+import { notebookToUrl } from "@/lib/nav";
 
 export default function Gallery({
     notebooks,
@@ -27,8 +24,8 @@ export default function Gallery({
 }) {
     const router = useRouter();
 
-    const openNotebook = ({ id, title }: NotebookMetadata) => {
-        router.push(`/${id}/${notebookSlug(title)}`);
+    const openNotebook = (nmd: NotebookMetadata) => {
+        router.push(notebookToUrl(nmd));
     };
 
     return (

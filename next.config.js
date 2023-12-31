@@ -21,12 +21,12 @@ const nextConfig = {
     async rewrites() {
         return [
             {
-                source: "/notebook-:slug",
-                destination: "/:slug",
+                source: "/notebook-:id",
+                destination: "/:id",
             },
             {
-                source: "/:slug/:title",
-                destination: "/:slug",
+                source: "/:id/:title",
+                destination: "/:id",
             },
         ];
     },

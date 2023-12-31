@@ -40,6 +40,17 @@ const deserializeTags = (tags: string) => tags.split(",").map((t) => t.trim());
 
 type NotebookEntry = Notebook & { tags: string };
 
+const notebookEntryToMetadata = (entry: NotebookEntry) => {
+    const undefineEmptyVal = (value: string | undefined) =>
+        [null, ""].includes(value || null) ? undefined : value;
+    return {
+        ...(entry as NotebookMetadata),
+        tags: deserializeTags(entry.tags),
+        author: undefineEmptyVal(entry.author),
+        image: undefineEmptyVal(entry.image),
+    };
+};
+
 export const getNotebookPreviews = async (): Promise<NotebookMetadata[]> => {
     const db = await pool.acquire();
     const allBooks = db
@@ -47,10 +58,9 @@ export const getNotebookPreviews = async (): Promise<NotebookMetadata[]> => {
         .all();
     db.release();
 
-    return allBooks.map((res: any) => ({
-        ...(res as NotebookMetadata),
-        tags: deserializeTags(res.tags),
-    }));
+    return allBooks.map((res: unknown) =>
+        notebookEntryToMetadata(res as NotebookEntry),
+    );
 };
 
 export const getNotebookMetaData = async (
@@ -63,11 +73,7 @@ export const getNotebookMetaData = async (
     const entry = select.get({ id }) as NotebookEntry;
     db.release();
 
-    if (entry)
-        return {
-            ...(entry as NotebookMetadata),
-            tags: deserializeTags(entry.tags),
-        };
+    if (entry) return notebookEntryToMetadata(entry);
     return null;
 };
 
@@ -83,7 +89,7 @@ export const getNotebookData = async (id: number): Promise<Notebook | null> => {
     if (entry)
         return {
             ...(entry as Notebook),
-            tags: deserializeTags(entry.tags),
+            ...notebookEntryToMetadata(entry ),
         };
 
     return null;
@@ -96,11 +102,13 @@ export const addNotebook = async (notebook: Notebook): Promise<number> => {
         `INSERT INTO ${TABLE} (title, author, tags, image, data) VALUES (@title, @author, @tags, @image, @data)`,
     );
 
+    const isEmptyOrNull = (str: string | undefined) =>
+        [undefined, null, ""].includes(str?.trim());
     const insertNotebook = db.transaction((notebook: Notebook) => {
         return insert.run({
             ...notebook,
-            author: notebook.author ? notebook.author : null,
-            image: notebook.image ? notebook.image : null,
+            author: isEmptyOrNull(notebook.author) ? notebook.author : null,
+            image: isEmptyOrNull(notebook.image) ? notebook.image : null,
             tags: serializeTags(notebook.tags || []),
         });
     });
