@@ -15,6 +15,7 @@ import { FileType } from "@/definitions/FileType";
 import Notebook from "@/definitions/Notebook";
 import { parseFileEncodedNotebook } from "@/lib/notebooks";
 import SuccessMessage from "./components/successMessage";
+import { notebookToUrl } from "@/lib/nav";
 
 export default function FileUploadDialog({
     upload,
@@ -63,16 +64,15 @@ export default function FileUploadDialog({
     }
     if (success) {
         const extraButtons = notebook?.id && (
-            <Button
-                w="100%"
-                colorScheme="teal"
-                leftIcon={<ExternalLinkIcon />}
-                onClick={() => {
-                    alert("open" + notebook.id);
-                }}
-            >
-                View
-            </Button>
+            <NextLink href={notebookToUrl(notebook)} passHref>
+                <Button
+                    w="100%"
+                    colorScheme="teal"
+                    leftIcon={<ExternalLinkIcon />}
+                >
+                    View
+                </Button>
+            </NextLink>
         );
         return (
             <SuccessMessage

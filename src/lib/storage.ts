@@ -104,11 +104,12 @@ export const addNotebook = async (notebook: Notebook): Promise<number> => {
 
     const isEmptyOrNull = (str: string | undefined) =>
         [undefined, null, ""].includes(str?.trim());
+
     const insertNotebook = db.transaction((notebook: Notebook) => {
         return insert.run({
             ...notebook,
-            author: isEmptyOrNull(notebook.author) ? notebook.author : null,
-            image: isEmptyOrNull(notebook.image) ? notebook.image : null,
+            author: isEmptyOrNull(notebook.author) ? null : notebook.author,
+            image: isEmptyOrNull(notebook.image) ? null : notebook.image,
             tags: serializeTags(notebook.tags || []),
         });
     });
