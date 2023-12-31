@@ -41,7 +41,7 @@ const SearchBar = ({
                 <Input
                     pr="6rem"
                     bg="white"
-                    onChange={(event) => update(event.target.value.trim())}
+                    onChange={(event) => update(event.target.value)}
                     placeholder="Try the Fuzzy search here"
                     value={query}
                     variant="filled"
@@ -128,7 +128,11 @@ const NotebooksDisplay = ({ notebooks }: { notebooks: NotebookMetadata[] }) => {
                     {/* TODO: maybe use wrap with wrap element */}
                     {filtered.map((book, i) => (
                         // TODO: add highlight for matched strings
-                        <NotebookCard notebook={book} key={`notebook-${i}`} />
+                        <NotebookCard
+                            notebook={book}
+                            key={`notebook-${i}`}
+                            highlight={query}
+                        />
                     ))}
                 </SimpleGrid>
             )}

@@ -1,3 +1,4 @@
+import React from "react";
 import {
     Heading,
     CardHeader,
@@ -11,6 +12,7 @@ import {
     Image,
     LinkBox,
     LinkOverlay,
+    Highlight,
 } from "@chakra-ui/react";
 
 import { NotebookMetadata } from "@/definitions/Notebook";
@@ -32,18 +34,42 @@ const AuthorTag = ({ author }: { author: string }) => (
     </Flex>
 );
 
+const containsStringCi = (str: string, search: string[]) => {
+    const cleanedStr = str.trim().toLowerCase();
+    const res = search
+        .filter((s) => s.length > 0)
+        .find((s) => cleanedStr.includes(s.trim().toLocaleLowerCase()));
+    return !!res;
+};
+
 export default function NotebookCard({
     notebook,
+    highlight,
 }: {
     notebook: NotebookMetadata;
+    highlight?: string;
 }) {
     const { title, author, tags, image } = notebook;
+    const query = highlight?.split(" ");
+
     return (
         <LinkBox as="article" maxW="sm" rounded="md">
             <Card size="sm">
                 <CardHeader>
                     <LinkOverlay href={notebookToUrl(notebook)}>
-                        <Heading size="xs">{title}</Heading>
+                        <Heading size="xs">
+                            <Highlight
+                                query={query || []}
+                                styles={{
+                                    px: "1",
+                                    py: "1",
+                                    rounded: "full",
+                                    bg: "teal.100",
+                                }}
+                            >
+                                {title}
+                            </Highlight>
+                        </Heading>
                     </LinkOverlay>
                 </CardHeader>
                 <CardBody>
@@ -54,13 +80,21 @@ export default function NotebookCard({
                     <Divider m={0} />
                     <Box p={3}>
                         <Flex wrap="wrap" direction="row" gap={2}>
-                            {tags.map((tag, i) => (
-                                <ColorfulTag
-                                    key={`tag-${i}`}
-                                    size="sm"
-                                    tag={tag}
-                                />
-                            ))}
+                            {tags.map((tag, i) => {
+                                const match =
+                                    query && containsStringCi(tag, query);
+                                const radius = match ? "none" : "full";
+                                const variant = match ? "solid" : "subtle";
+                                return (
+                                    <ColorfulTag
+                                        key={`tag-${i}`}
+                                        size="sm"
+                                        tag={tag}
+                                        borderRadius={radius}
+                                        variant={variant}
+                                    />
+                                );
+                            })}
                         </Flex>
                     </Box>
                 </CardFooter>
