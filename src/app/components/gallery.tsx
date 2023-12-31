@@ -1,6 +1,7 @@
 "use client";
 
 import { Link } from "@chakra-ui/next-js";
+import { useRouter } from "next/navigation";
 import {
     Box,
     Heading,
@@ -11,6 +12,7 @@ import {
     SimpleGrid,
 } from "@chakra-ui/react";
 import { Search2Icon } from "@chakra-ui/icons";
+import { convert as slugify } from "url-slug";
 
 import { NotebookMetadata } from "@/definitions/Notebook";
 import NotebookCard from "./notebookCard";
@@ -20,6 +22,13 @@ export default function Gallery({
 }: {
     notebooks: NotebookMetadata[];
 }) {
+    const router = useRouter();
+
+    const openNotebook = ({ id, title }: NotebookMetadata) => {
+        const slug = slugify(title, { camelCase: true });
+        router.push(`/${id}/${slug}`);
+    };
+
     return (
         <VStack
             align="center"
@@ -61,9 +70,7 @@ export default function Gallery({
                     <NotebookCard
                         notebook={book}
                         key={`notebook-${i}`}
-                        onClick={(notebook) => {
-                            alert("open " + notebook.title);
-                        }}
+                        onClick={openNotebook}
                     />
                 ))}
             </SimpleGrid>

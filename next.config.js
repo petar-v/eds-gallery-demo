@@ -1,11 +1,16 @@
 /** @type {import('next').NextConfig} */
 const path = require("path");
+const nextRoutes = require("nextjs-routes/config");
+const withRoutes = nextRoutes({
+    cwd: __dirname,
+});
 
 const nextConfig = {
     reactStrictMode: true,
     experimental: {
         webpackBuildWorker: true,
         instrumentationHook: true,
+        typedRoutes: true,
         serverActions: {
             bodySizeLimit: "15mb",
         },
@@ -40,4 +45,4 @@ const nextConfig = {
     },
 };
 
-module.exports = nextConfig;
+module.exports = withRoutes(nextConfig);

@@ -10305,6 +10305,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nextjs-routes@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "nextjs-routes@npm:2.1.0"
+  dependencies:
+    chokidar: "npm:^3.5.3"
+  peerDependencies:
+    next: "*"
+  bin:
+    nextjs-routes: dist/cli.js
+  checksum: 75069f874a4b2e60f981ebaa3f6dc1772ca311edf9f83efb742c5775075d510a16a0c6a2d038cdbbe4db21197f2d92b90de099d54eadf47ae810be6f70c50d7c
+  languageName: node
+  linkType: hard
+
 "node-abi@npm:^3.3.0":
   version: 3.52.0
   resolution: "node-abi@npm:3.52.0"
@@ -12048,6 +12061,7 @@ __metadata:
     md5: "npm:^2.3.0"
     migration-files: "npm:^0.4.1"
     next: "npm:^14.0.4"
+    nextjs-routes: "npm:^2.1.0"
     notebookjs: "npm:^0.6.7"
     path: "npm:^0.12.7"
     postcss: "npm:^8.4.32"
@@ -12071,6 +12085,7 @@ __metadata:
     tailwindcss: "npm:^3.4.0"
     ts-node: "npm:^10.9.2"
     typescript: "npm:^5.3.3"
+    url-slug: "npm:^4.0.1"
     vercel: "npm:^33.0.1"
     webpack: "npm:^5.89.0"
     wrangler: "npm:^3.22.1"
@@ -13879,6 +13894,13 @@ __metadata:
     querystringify: "npm:^2.1.1"
     requires-port: "npm:^1.0.0"
   checksum: c9e96bc8c5b34e9f05ddfeffc12f6aadecbb0d971b3cc26015b58d5b44676a99f50d5aeb1e5c9e61fa4d49961ae3ab1ae997369ed44da51b2f5ac010d188e6ad
+  languageName: node
+  linkType: hard
+
+"url-slug@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "url-slug@npm:4.0.1"
+  checksum: ed76334f8450558f2ea61ec4ffe6a477ab4926d9bcfb6e7e47478551787ad025a3da12bc4d57e797d4c64e7c34414d1bafc2a573b189ca86697547d1b7865fa0
   languageName: node
   linkType: hard
 

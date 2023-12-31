@@ -18,6 +18,7 @@ export default function NotebookCard({
     notebook: NotebookMetadata;
     onClick?: (n: NotebookMetadata) => void;
 }) {
+    const { title, author, tags, image } = notebook;
     return (
         <Card
             cursor={onClick ? "pointer" : undefined}
@@ -26,12 +27,12 @@ export default function NotebookCard({
             }}
         >
             <CardHeader>
-                <Heading size="md">{notebook.title}</Heading>
+                <Heading size="md">{title}</Heading>
             </CardHeader>
             <CardBody></CardBody>
             <CardFooter>
                 <Flex wrap="wrap" direction="row" gap={2} p={3}>
-                    {notebook.tags.map((tag, i) => (
+                    {tags.map((tag, i) => (
                         <ColorfulTag key={`tag-${i}`} tag={tag} />
                     ))}
                 </Flex>
