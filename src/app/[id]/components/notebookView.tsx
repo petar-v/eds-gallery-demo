@@ -9,6 +9,8 @@ import { IpynbRenderer } from "react-ipynb-renderer";
 
 import Notebook from "@/definitions/Notebook";
 
+import ReactDOM from "react-dom";
+
 import "react-ipynb-renderer/dist/styles/default.css";
 
 // FIXME: links open on the same tab
@@ -48,7 +50,7 @@ const sanitizerHtml = (html: string): string => {
 const SANITIZER: "sanitize-html" | "dompurify" = "dompurify";
 
 export default function NotebookView({ notebook }: { notebook: Notebook }) {
-    return (
+    const renderedIpynv = (
         <IpynbRenderer
             ipynb={JSON.parse(notebook.data)}
             seqAsExecutionCount={true}
@@ -59,4 +61,6 @@ export default function NotebookView({ notebook }: { notebook: Notebook }) {
             // TODO: make the themes switchable
         />
     );
+
+    return <>{renderedIpynv}</>;
 }
