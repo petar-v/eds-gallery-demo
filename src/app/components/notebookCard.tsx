@@ -9,11 +9,14 @@ import {
     Box,
     Divider,
     Image,
+    LinkBox,
+    LinkOverlay,
 } from "@chakra-ui/react";
 
 import { NotebookMetadata } from "@/definitions/Notebook";
 import { CardFooter } from "react-bootstrap";
 import ColorfulTag from "@/components/ColorfulTag";
+import { notebookToUrl } from "@/lib/nav";
 
 const AuthorTag = ({ author }: { author: string }) => (
     <Flex>
@@ -31,37 +34,37 @@ const AuthorTag = ({ author }: { author: string }) => (
 
 export default function NotebookCard({
     notebook,
-    onClick,
 }: {
     notebook: NotebookMetadata;
-    onClick?: (n: NotebookMetadata) => void;
 }) {
     const { title, author, tags, image } = notebook;
     return (
-        <Card
-            cursor={onClick ? "pointer" : undefined}
-            onClick={() => {
-                onClick && onClick(notebook);
-            }}
-            size="sm"
-        >
-            <CardHeader>
-                <Heading size="xs">{title}</Heading>
-            </CardHeader>
-            <CardBody>
-                {image && <Image maxH="10em" alt={title} src={image} />}
-            </CardBody>
-            <CardFooter>
-                <Box p={3}>{author && <AuthorTag author={author} />}</Box>
-                <Divider m={0} />
-                <Box p={3}>
-                    <Flex wrap="wrap" direction="row" gap={2}>
-                        {tags.map((tag, i) => (
-                            <ColorfulTag key={`tag-${i}`} size="sm" tag={tag} />
-                        ))}
-                    </Flex>
-                </Box>
-            </CardFooter>
-        </Card>
+        <LinkBox as="article" maxW="sm" rounded="md">
+            <Card size="sm">
+                <CardHeader>
+                    <LinkOverlay href={notebookToUrl(notebook)}>
+                        <Heading size="xs">{title}</Heading>
+                    </LinkOverlay>
+                </CardHeader>
+                <CardBody>
+                    {image && <Image maxH="10em" alt={title} src={image} />}
+                </CardBody>
+                <CardFooter>
+                    <Box p={3}>{author && <AuthorTag author={author} />}</Box>
+                    <Divider m={0} />
+                    <Box p={3}>
+                        <Flex wrap="wrap" direction="row" gap={2}>
+                            {tags.map((tag, i) => (
+                                <ColorfulTag
+                                    key={`tag-${i}`}
+                                    size="sm"
+                                    tag={tag}
+                                />
+                            ))}
+                        </Flex>
+                    </Box>
+                </CardFooter>
+            </Card>
+        </LinkBox>
     );
 }

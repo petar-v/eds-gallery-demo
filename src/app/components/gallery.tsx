@@ -93,11 +93,7 @@ export default function Gallery({
                     spacing={4}
                 >
                     {notebooks.map((book, i) => (
-                        <NotebookCard
-                            notebook={book}
-                            key={`notebook-${i}`}
-                            onClick={openNotebook}
-                        />
+                        <NotebookCard notebook={book} key={`notebook-${i}`} />
                     ))}
                 </SimpleGrid>
             ) : (
