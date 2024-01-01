@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef } from "react";
 
 import DOMPurify from "dompurify";
-// import sanitizeHtml from "sanitize-html";
+import sanitizeHtml, { simpleTransform } from "sanitize-html";
 
 import { IpynbRenderer } from "react-ipynb-renderer";
 
 import Notebook from "@/definitions/Notebook";
 
 import "react-ipynb-renderer/dist/styles/default.css";
+import TableOfContents from "./tableOfContents";
 
 // FIXME: links open on the same tab
 
@@ -33,46 +34,35 @@ const sanitizerDomPurify = (html: string): string => {
     });
 };
 
-// const sanitizerHtml = (html: string): string => {
-//     return sanitizeHtml(html, {
-//         transformTags: {
-//             a: sanitizeHtml.simpleTransform("a", {
-//                 target: "_blank",
-//                 rel: "noreferrer",
-//             }),
-//         },
-//         allowedAttributes: {},
-//     });
-// };
+const sanitizerHtml = (html: string): string =>
+    sanitizeHtml(html, {
+        transformTags: {
+            a: simpleTransform("a", {
+                target: "_blank",
+                rel: "noreferrer",
+            }),
+        },
+        allowedAttributes: {},
+    });
 
-// const SANITIZER: "sanitize-html" | "dompurify" = "dompurify";
+const SANITIZER: "sanitize-html" | "dompurify" = "dompurify";
 
 export default function NotebookView({ notebook }: { notebook: Notebook }) {
     const articleRef = useRef<HTMLElement>(null);
-
-    useEffect(() => {
-        const article = articleRef.current;
-        if (article) {
-            console.log("ARTICLE", article);
-            article.querySelectorAll("h1,h2,h3,h4").forEach((heading, i) => {
-                heading.id = `heading-${i}`;
-                console.log(
-                    `${heading.nodeName}:`,
-                    heading.id,
-                    heading.innerHTML,
-                );
-            });
-        }
-    }, []);
-
     return (
         <>
             <article ref={articleRef}>
+                <TableOfContents source={articleRef} maxDepth={3} />
                 <IpynbRenderer
                     ipynb={JSON.parse(notebook.data)}
                     seqAsExecutionCount={true}
                     syntaxTheme="prism" // or duotoneSpace
-                    htmlFilter={sanitizerDomPurify}
+                    htmlFilter={
+                        SANITIZER === "dompurify"
+                            ? sanitizerDomPurify
+                            : sanitizerHtml
+                    }
+                    // FIXME: the opticon tags
                     // TODO: make the themes switchable
                 />
             </article>
