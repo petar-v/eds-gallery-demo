@@ -1,5 +1,10 @@
 import React, { useEffect, RefObject, useState } from "react";
-import { As, Heading } from "@chakra-ui/react";
+
+import { nanoid } from "nanoid";
+import { slug } from "@/lib/nav";
+
+import NextLink from "next/link";
+import { List, ListItem, Link } from "@chakra-ui/react";
 
 export type Heading = {
     id: string;
@@ -12,6 +17,8 @@ export type NestedHeading = {
     label: string;
     subheadings: NestedHeading[];
 };
+
+const MAX_DEPTH_TOC = 4;
 
 const createToCFromHeadings = (headings: Heading[]): NestedHeading[] => {
     // TODO: refactor this for clarity
@@ -34,9 +41,11 @@ const createToCFromHeadings = (headings: Heading[]): NestedHeading[] => {
 const TableOfContents = ({
     source,
     maxDepth,
+    insertIDs,
 }: {
     source: RefObject<HTMLElement>;
     maxDepth?: number;
+    insertIDs?: boolean;
 }) => {
     const [toc, setToc] = useState<NestedHeading[]>([]);
     useEffect(() => {
@@ -44,7 +53,7 @@ const TableOfContents = ({
         if (!article) {
             return;
         }
-        const selector = [...Array(maxDepth || 4).keys()]
+        const selector = [...Array(maxDepth || MAX_DEPTH_TOC).keys()]
             .map((level) => `h${level + 1}`)
             .join(",");
 
@@ -52,37 +61,38 @@ const TableOfContents = ({
             article.querySelectorAll(selector),
         ).map((heading: Element, i: number) => {
             // TODO: attach IDs to the objects themselves to pick up the scroll
+            const label = heading.textContent || ""; // || heading.innerText;
+            if (insertIDs) {
+                heading.id = `${nanoid(6)}-${slug(label)}`;
+            }
             return {
                 id: heading.id || `heading-${i}`,
-                label: heading.textContent || "", // || heading.innerText;
+                label,
                 level: parseInt(heading.nodeName.replace("H", "")),
             };
         });
 
         setToc(createToCFromHeadings(headings));
-    }, [source, maxDepth]);
+    }, [source, maxDepth, insertIDs]);
 
-    const headingToElement = (
-        headings: NestedHeading[],
-        level: number,
-    ): React.ReactNode[] =>
-        (headings.length > 0 &&
-            headings.map(({ id, label, subheadings }, i) => (
-                <>
-                    <Heading
-                        key={`heading-${i}-${id}`}
-                        as={`h${level}` as As}
-                        ml={`${level * 2}rem`}
-                        noOfLines={1}
-                    >
-                        {label}
-                    </Heading>
-                    {headingToElement(subheadings, level + 1)}
-                </>
-            ))) ||
-        [];
-
-    return <>Table of contents: {headingToElement(toc, 1)}</>;
+    const headingsToElement = (headings: NestedHeading[], level: number) => {
+        if (headings.length === 0) {
+            return <></>;
+        }
+        return (
+            <List>
+                {headings.map(({ id, label, subheadings }, index) => (
+                    <ListItem key={`heading-${index}-${id}`} noOfLines={1}>
+                        <Link as={NextLink} href={`#${id}`}>
+                            {index + 1} {label}
+                        </Link>
+                        {headingsToElement(subheadings, level + 1)}
+                    </ListItem>
+                ))}
+            </List>
+        );
+    };
+    return <>Table of contents: {headingsToElement(toc, 1)}</>;
 };
 
 export default TableOfContents;

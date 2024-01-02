@@ -52,7 +52,11 @@ export default function NotebookView({ notebook }: { notebook: Notebook }) {
     return (
         <>
             <article ref={articleRef}>
-                <TableOfContents source={articleRef} maxDepth={3} />
+                <TableOfContents
+                    source={articleRef}
+                    maxDepth={3}
+                    insertIDs={true}
+                />
                 <IpynbRenderer
                     ipynb={JSON.parse(notebook.data)}
                     seqAsExecutionCount={true}

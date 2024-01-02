@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import type { Metadata, ResolvingMetadata } from "next";
 
-import { Box, Heading } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 
 import { getNotebookData, getNotebookMetaData } from "@/lib/storage";
 
