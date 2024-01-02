@@ -8843,7 +8843,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:^4.17.21, lodash@npm:^4.7.0":
+"lodash@npm:4.17.21, lodash@npm:^4.17.21, lodash@npm:^4.7.0":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: c08619c038846ea6ac754abd6dd29d2568aa705feb69339e836dfa8d8b09abbb2f859371e86863eda41848221f9af43714491467b5b0299122431e202bb0c532
@@ -11666,6 +11666,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-use-scrollspy@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "react-use-scrollspy@npm:3.1.1"
+  dependencies:
+    lodash: "npm:4.17.21"
+  peerDependencies:
+    react: ">=16.8.6"
+  checksum: 3dd056316e297dbbf9b034fe1a8e53891c2d5435d70b8941eb964c94e2be0484b0c7e9e64b088713d0d71c068c36935a9b7838aa75f5fcd0d5945f2af5d93996
+  languageName: node
+  linkType: hard
+
 "react@npm:^18.2.0":
   version: 18.2.0
   resolution: "react@npm:18.2.0"
@@ -12117,6 +12128,7 @@ __metadata:
     react-hook-form: "npm:^7.49.2"
     react-ipynb-renderer: "npm:^2.1.4"
     react-markdown: "npm:^9.0.1"
+    react-use-scrollspy: "npm:^3.1.1"
     sanitize-html: "npm:^2.11.0"
     sass: "npm:^1.69.6"
     stylelint: "npm:^16.1.0"

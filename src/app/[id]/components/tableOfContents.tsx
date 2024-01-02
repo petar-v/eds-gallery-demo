@@ -1,7 +1,8 @@
-import React, { useEffect, RefObject, useState } from "react";
+import React, { useEffect, RefObject, useState, createRef } from "react";
 
 import { nanoid } from "nanoid";
 import { slug } from "@/lib/nav";
+import useScrollSpy from "react-use-scrollspy";
 
 import NextLink from "next/link";
 import { List, ListItem, Link } from "@chakra-ui/react";
@@ -38,6 +39,14 @@ const createToCFromHeadings = (headings: Heading[]): NestedHeading[] => {
     return result;
 };
 
+const refFromElement = (element: HTMLElement): RefObject<HTMLElement> => {
+    const elementRef = {
+        ...createRef<HTMLElement>(),
+        current: element,
+    };
+    return elementRef;
+};
+
 const TableOfContents = ({
     source,
     maxDepth,
@@ -48,6 +57,15 @@ const TableOfContents = ({
     insertIDs?: boolean;
 }) => {
     const [toc, setToc] = useState<NestedHeading[]>([]);
+
+    const [headingRefs, setHeadingRefs] = useState<RefObject<HTMLElement>[]>(
+        [],
+    );
+    const activeSection = useScrollSpy({
+        sectionElementRefs: headingRefs,
+        offsetPx: -80,
+    });
+
     useEffect(() => {
         const article = source.current;
         if (!article) {
@@ -65,15 +83,22 @@ const TableOfContents = ({
             if (insertIDs) {
                 heading.id = `${nanoid(6)}-${slug(label)}`;
             }
+            setHeadingRefs([
+                ...headingRefs,
+                refFromElement(heading.parentElement as HTMLElement),
+            ]);
             return {
-                id: heading.id || `heading-${i}`,
                 label,
+                id: heading.id || `heading-${i}`,
                 level: parseInt(heading.nodeName.replace("H", "")),
             };
         });
 
         setToc(createToCFromHeadings(headings));
     }, [source, maxDepth, insertIDs]);
+
+    console.log("Active section", activeSection);
+    console.log("heading refs", headingRefs);
 
     const headingsToElement = (headings: NestedHeading[], level: number) => {
         if (headings.length === 0) {
@@ -83,7 +108,13 @@ const TableOfContents = ({
             <List>
                 {headings.map(({ id, label, subheadings }, index) => (
                     <ListItem key={`heading-${index}-${id}`} noOfLines={1}>
-                        <Link as={NextLink} href={`#${id}`}>
+                        <Link
+                            as={NextLink}
+                            textDecoration={
+                                activeSection === 1 ? "underline" : undefined
+                            }
+                            href={`#${id}`}
+                        >
                             {index + 1} {label}
                         </Link>
                         {headingsToElement(subheadings, level + 1)}
@@ -92,7 +123,7 @@ const TableOfContents = ({
             </List>
         );
     };
-    return <>Table of contents: {headingsToElement(toc, 1)}</>;
+    return <nav>Table of contents: {headingsToElement(toc, 1)}</nav>;
 };
 
 export default TableOfContents;
