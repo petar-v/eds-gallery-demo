@@ -20,3 +20,7 @@ export const notebookToUrl = ({ id, title }: NotebookMetadata): Route => {
     }
     return `/${id}/${slug(title)}` as Route;
 };
+
+export const galleryRoute: Route = `/`;
+
+export const uploadNotebookRoute: Route = "/upload-book";

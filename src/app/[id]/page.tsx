@@ -3,11 +3,14 @@ import { notFound } from "next/navigation";
 
 import type { Metadata, ResolvingMetadata } from "next";
 
-import { getNotebookData, getNotebookMetaData } from "@/lib/storage";
+import {
+    getNotebookData,
+    getNotebookMetaData,
+    removeNotebookByID,
+} from "@/lib/storage";
 
-import { removeNotebook } from "@/lib/storage";
-import { NotebookMetadata } from "@/definitions/Notebook";
 import { DeleteNotebookFunctionType } from "./components/notebookView";
+import { Box } from "@chakra-ui/react";
 
 type Props = {
     params: { id: number };
@@ -55,35 +58,38 @@ export async function generateMetadata(
 
 const NotebookView = dynamic(() => import("./components/notebookView"), {
     ssr: false,
-    loading: () => <>LOADING...</>, // TODO: create a loading component
+    loading: () => (
+        <Box alignItems="center" w="full" mt={10}>
+            Loading...
+        </Box>
+    ), // TODO: create a loading component
 });
 
-const deleteNotebook: DeleteNotebookFunctionType = async (notebook) => {
+const deleteNotebook: DeleteNotebookFunctionType = async (notebookId) => {
     "use server";
-
-    console.log("Deleted notebook", notebook.id);
-
-    return new Promise((resolve) => {
-        resolve({
-            success: true,
-        });
-    });
-    // try {
-    //     const changedRows = await removeNotebook(notebook);
-    //     console.log(`Removed new notebook with ID ${notebook.id}`);
-    //     if (changedRows === 0) {
-    //         return {
-    //             success: false,
-    //             error: "It seems that this notebook has not been deleted. Maybe someone else has deleted it already?",
-    //         };
-    //     }
-    //     return { success: true };
-    // } catch (err) {
-    //     return {
-    //         success: false,
-    //         error: "The notebook could not be saved to the database.",
-    //     };
-    // }
+    if (notebookId === undefined) {
+        return {
+            success: false,
+            error: "No valid notebook ID provided.",
+        };
+    }
+    console.log("Deleted notebook", notebookId);
+    try {
+        const changedRows = await removeNotebookByID(notebookId);
+        console.log(`Removed new notebook with ID ${notebookId}`);
+        if (changedRows === 0) {
+            return {
+                success: false,
+                error: "It seems that this notebook has not been deleted. Maybe someone else has deleted it already?",
+            };
+        }
+        return { success: true };
+    } catch (err) {
+        return {
+            success: false,
+            error: "The notebook could not be saved to the database.",
+        };
+    }
 };
 
 export default async function Page({ params: { id } }: Props) {
@@ -92,6 +98,7 @@ export default async function Page({ params: { id } }: Props) {
     if (!notebook) {
         return notFound();
     }
+
     // TODO: add error boundaries
     return (
         <main>

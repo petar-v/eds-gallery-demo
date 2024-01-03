@@ -1,33 +1,47 @@
 "use client";
 
 import React, { RefObject, useRef, PropsWithChildren } from "react";
+import { useRouter } from "next/navigation";
 
 import {
     Flex,
     Container,
     Heading,
     Box,
+    Text,
     Button,
     StackDivider,
     VStack,
+    useToast,
+    useDisclosure,
+    Modal,
+    ModalBody,
+    ModalCloseButton,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    ModalOverlay,
+    ToastProps,
 } from "@chakra-ui/react";
 import {
     HamburgerIcon,
     InfoIcon,
     DeleteIcon,
-    SettingsIcon,
+    WarningIcon,
 } from "@chakra-ui/icons";
 
-import Notebook, { NotebookMetadata } from "@/definitions/Notebook";
+import Notebook from "@/definitions/Notebook";
 
 import TableOfContents from "./tableOfContents";
 import ColorfulTag from "@/components/ColorfulTag";
 
 import Ipynb from "./Ipynb";
+import { galleryRoute } from "@/lib/nav";
 
-export type DeleteNotebookFunctionType = (
-    notebook: NotebookMetadata,
-) => Promise<{ success: boolean; error?: string }>;
+export type DeleteNotebookFunctionType = (id: number | undefined) => Promise<{
+    success: boolean;
+    error?: string;
+}>;
 
 const NotebookDeleteButton = ({
     notebook,
@@ -35,25 +49,53 @@ const NotebookDeleteButton = ({
     children,
 }: PropsWithChildren & {
     notebook: Notebook;
-    deleteNotebook: DeleteNotebookFunctionType;
+    deleteNotebook: () => void;
 }) => {
+    const { isOpen, onOpen, onClose } = useDisclosure();
     return (
-        <Button
-            w="full"
-            colorScheme="red"
-            leftIcon={<DeleteIcon />}
-            onClick={() => {
-                deleteNotebook(notebook)
-                    .then(({ success }) => {
-                        alert(success);
-                    })
-                    .catch((error) => {
-                        alert(error.message);
-                    });
-            }}
-        >
-            {children}
-        </Button>
+        <>
+            <Button
+                w="full"
+                colorScheme="red"
+                leftIcon={<DeleteIcon />}
+                onClick={onOpen}
+            >
+                {children}
+            </Button>
+            <Modal isOpen={isOpen} onClose={onClose}>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Delete this notebook?</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
+                        <Text>
+                            Are you sure you want to delete{" "}
+                            <Text as="b">{notebook.title}</Text>?
+                        </Text>
+                        <Text>
+                            This will delete the notebook from the gallery and
+                            it will not be accessible by anyone anymore.
+                        </Text>
+                    </ModalBody>
+
+                    <ModalFooter>
+                        <Button mr={3} onClick={onClose} variant="ghost">
+                            Cancel
+                        </Button>
+                        <Button
+                            colorScheme="red"
+                            leftIcon={<WarningIcon />}
+                            onClick={() => {
+                                deleteNotebook();
+                                onClose();
+                            }}
+                        >
+                            Delete for everyone
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+        </>
     );
 };
 
@@ -64,9 +106,9 @@ const NotebookActions = ({
 }: {
     notebook: Notebook;
     notebookRef: RefObject<HTMLElement>;
-    deleteNotebook: DeleteNotebookFunctionType;
+    deleteNotebook: () => void;
 }) => {
-    const divider = <StackDivider borderColor="gray.200" />;
+    const divider = <StackDivider borderColor="gray.300" />;
     return (
         <VStack align="stretch" divider={divider} spacing={4}>
             {divider}
@@ -102,10 +144,6 @@ const NotebookActions = ({
                 )}
             </Container>
             <Container>
-                {/* <Heading noOfLines={1} size="sm">
-                    <SettingsIcon mr={1} />
-                    Notebook Actions
-                </Heading> */}
                 <NotebookDeleteButton
                     deleteNotebook={deleteNotebook}
                     notebook={notebook}
@@ -126,6 +164,49 @@ export default function NotebookView({
 }) {
     const notebookRef = useRef<HTMLDivElement>(null);
 
+    const toast = useToast();
+    const router = useRouter();
+
+    const redirectToGallery = () => router.replace(galleryRoute);
+
+    const errorToast = (message: string): ToastProps => ({
+        title: "Error when deleting this notebook",
+        description: `${message} Please try again later.`,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+    });
+
+    const executeDeleteNotebook = () => {
+        const deletePromise = deleteNotebook(notebook.id);
+        toast.promise(deletePromise, {
+            success: ({
+                success,
+                error,
+            }: {
+                success: boolean;
+                error?: string;
+            }) => {
+                if (success) {
+                    return {
+                        title: "This notebook was deleted",
+                        description: `You have successfully deleted this notebook. You will be redirected to the Gallery shortly`,
+                        status: "success",
+                        duration: 4000,
+                        isClosable: true,
+                        onCloseComplete: redirectToGallery,
+                    };
+                }
+                return errorToast(error || "Unknown issue.");
+            },
+            error: (error) => errorToast(error.message),
+            loading: {
+                title: "Deleting notebook",
+                description: "Please wait...",
+            },
+        });
+    };
+
     return (
         <Flex direction={{ base: "column", md: "row" }} maxW="100%" px={4}>
             <Box
@@ -138,7 +219,7 @@ export default function NotebookView({
                 <NotebookActions
                     notebook={notebook}
                     notebookRef={notebookRef}
-                    deleteNotebook={deleteNotebook}
+                    deleteNotebook={executeDeleteNotebook}
                 />
             </Box>
             <Box flex="0 1 80%" maxW={{ base: "100%", md: "80%" }} pr={3}>
