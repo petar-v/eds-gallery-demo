@@ -78,25 +78,27 @@ export default function NotebookCard({
                 <CardFooter>
                     <Box p={3}>{author && <AuthorTag author={author} />}</Box>
                     <Divider m={0} />
-                    <Box p={3}>
-                        <Flex wrap="wrap" direction="row" gap={2}>
-                            {tags.map((tag, i) => {
-                                const match =
-                                    query && containsStringCi(tag, query);
-                                const radius = match ? "none" : "full";
-                                const variant = match ? "solid" : "subtle";
-                                return (
-                                    <ColorfulTag
-                                        key={`tag-${i}`}
-                                        size="sm"
-                                        tag={tag}
-                                        borderRadius={radius}
-                                        variant={variant}
-                                    />
-                                );
-                            })}
-                        </Flex>
-                    </Box>
+                    {tags.length > 0 && (
+                        <Box p={3}>
+                            <Flex wrap="wrap" direction="row" gap={2}>
+                                {tags.map((tag, i) => {
+                                    const match =
+                                        query && containsStringCi(tag, query);
+                                    const radius = match ? "none" : "full";
+                                    const variant = match ? "solid" : "subtle";
+                                    return (
+                                        <ColorfulTag
+                                            key={`tag-${i}`}
+                                            size="sm"
+                                            tag={tag}
+                                            borderRadius={radius}
+                                            variant={variant}
+                                        />
+                                    );
+                                })}
+                            </Flex>
+                        </Box>
+                    )}
                 </CardFooter>
             </Card>
         </LinkBox>

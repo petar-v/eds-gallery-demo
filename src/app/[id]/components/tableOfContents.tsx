@@ -2,7 +2,6 @@ import React, { useEffect, RefObject, useState, createRef } from "react";
 
 import { nanoid } from "nanoid";
 import { slug } from "@/lib/nav";
-import useScrollSpy from "react-use-scrollspy";
 
 import NextLink from "next/link";
 import { List, ListItem, Link } from "@chakra-ui/react";
@@ -19,111 +18,109 @@ export type NestedHeading = {
     subheadings: NestedHeading[];
 };
 
-const MAX_DEPTH_TOC = 4;
+const MAX_DEPTH_TOC = 6;
 
 const createToCFromHeadings = (headings: Heading[]): NestedHeading[] => {
-    // TODO: refactor this for clarity
-    const result: NestedHeading[] = [];
-    headings.forEach(({ id, label, level }) => {
-        let currentLevelHeadings = result;
-        for (let i = 1; i < level; i++) {
-            const lastHeading =
-                currentLevelHeadings[currentLevelHeadings.length - 1];
-
-            if (lastHeading) {
-                currentLevelHeadings = lastHeading.subheadings;
-            }
+    const topLevel = headings[0].level;
+    const getLastAtLevel = (
+        nestedList: NestedHeading[],
+        level: number,
+    ): NestedHeading | undefined => {
+        if (nestedList.length === 0) {
+            return undefined;
         }
-        currentLevelHeadings.push({ id, label, subheadings: [] });
-    });
-    return result;
-};
-
-const refFromElement = (element: HTMLElement): RefObject<HTMLElement> => {
-    const elementRef = {
-        ...createRef<HTMLElement>(),
-        current: element,
+        const last = nestedList[nestedList.length - 1];
+        if (level == topLevel) {
+            return last;
+        }
+        return getLastAtLevel(last.subheadings, level - 1);
     };
-    return elementRef;
+
+    const nestedList: NestedHeading[] = [];
+    headings.forEach(({ id, label, level }) => {
+        const entry: NestedHeading = {
+            id,
+            label,
+            subheadings: [],
+        };
+        if (level === topLevel) {
+            nestedList.push(entry);
+            return;
+        }
+        getLastAtLevel(nestedList, level - 1)?.subheadings.push(entry);
+    });
+    return nestedList;
 };
 
 const TableOfContents = ({
     source,
     maxDepth,
     insertIDs,
+    includeH1,
 }: {
     source: RefObject<HTMLElement>;
     maxDepth?: number;
     insertIDs?: boolean;
+    includeH1?: boolean;
 }) => {
     const [toc, setToc] = useState<NestedHeading[]>([]);
-
-    const [headingRefs, setHeadingRefs] = useState<RefObject<HTMLElement>[]>(
-        [],
-    );
-    const activeSection = useScrollSpy({
-        sectionElementRefs: headingRefs,
-        offsetPx: -80,
-    });
 
     useEffect(() => {
         const article = source.current;
         if (!article) {
             return;
         }
-        const selector = [...Array(maxDepth || MAX_DEPTH_TOC).keys()]
-            .map((level) => `h${level + 1}`)
-            .join(",");
-
+        const selectors = [...Array(maxDepth || MAX_DEPTH_TOC).keys()].map(
+            (level) => `h${level + 1}`,
+        );
+        if (!includeH1) {
+            selectors.shift();
+        }
         const headings: Heading[] = Array.from(
-            article.querySelectorAll(selector),
+            article.querySelectorAll(selectors.join(",")),
         ).map((heading: Element, i: number) => {
-            // TODO: attach IDs to the objects themselves to pick up the scroll
             const label = heading.textContent || ""; // || heading.innerText;
             if (insertIDs) {
-                heading.id = `${nanoid(6)}-${slug(label)}`;
+                heading.id = `${nanoid(5)}-${slug(label)}`;
             }
-            setHeadingRefs([
-                ...headingRefs,
-                refFromElement(heading.parentElement as HTMLElement),
-            ]);
             return {
                 label,
-                id: heading.id || `heading-${i}`,
                 level: parseInt(heading.nodeName.replace("H", "")),
+                id: heading.id || `heading-${i}`,
             };
         });
-
         setToc(createToCFromHeadings(headings));
-    }, [source, maxDepth, insertIDs]);
+    }, [source, maxDepth, insertIDs, includeH1]);
 
-    console.log("Active section", activeSection);
-    console.log("heading refs", headingRefs);
-
-    const headingsToElement = (headings: NestedHeading[], level: number) => {
+    const headingsToElement = (
+        headings: NestedHeading[],
+        level: number,
+        upperLevel?: number[],
+    ) => {
         if (headings.length === 0) {
             return <></>;
         }
         return (
-            <List>
-                {headings.map(({ id, label, subheadings }, index) => (
-                    <ListItem key={`heading-${index}-${id}`} noOfLines={1}>
-                        <Link
-                            as={NextLink}
-                            textDecoration={
-                                activeSection === 1 ? "underline" : undefined
-                            }
-                            href={`#${id}`}
-                        >
-                            {index + 1} {label}
-                        </Link>
-                        {headingsToElement(subheadings, level + 1)}
-                    </ListItem>
-                ))}
+            <List pl={level === 1 ? 0 : ""}>
+                {headings.map(({ id, label, subheadings }, index) => {
+                    const levelAddr = [...(upperLevel || []), index + 1];
+                    return (
+                        <ListItem key={`heading-${index}-${id}`} fontSize="sm">
+                            <Link as={NextLink} href={`#${id}`}>
+                                {levelAddr.join(".")}. {label}
+                            </Link>
+                            {headingsToElement(
+                                subheadings,
+                                level + 1,
+                                levelAddr,
+                            )}
+                        </ListItem>
+                    );
+                })}
             </List>
         );
     };
-    return <nav>Table of contents: {headingsToElement(toc, 1)}</nav>;
+    return headingsToElement(toc, 1);
 };
 
 export default TableOfContents;

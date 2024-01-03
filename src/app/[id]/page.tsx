@@ -2,11 +2,10 @@ import { notFound } from "next/navigation";
 
 import type { Metadata, ResolvingMetadata } from "next";
 
-import { Box } from "@chakra-ui/react";
-
 import { getNotebookData, getNotebookMetaData } from "@/lib/storage";
+import dynamic from "next/dynamic";
 
-import NotebookView from "./components/notebookView";
+// import NotebookView from "./components/notebookView";
 
 type Props = {
     params: { id: number };
@@ -52,6 +51,11 @@ export async function generateMetadata(
     };
 }
 
+const NotebookView = dynamic(() => import("./components/notebookView"), {
+    ssr: false,
+    loading: () => <>LOADING...</>, // TODO: create a loading component
+});
+
 export default async function Page({ params: { id } }: Props) {
     const notebook = await getNotebookData(id);
     if (!notebook) {
@@ -59,23 +63,9 @@ export default async function Page({ params: { id } }: Props) {
     }
     // TODO: add error boundaries
     return (
-        <>
-            {/* <header>
-                <Heading>{notebook.title}</Heading>
-            </header> */}
-            <main>
-                <Box
-                    w="full"
-                    maxW="4xl"
-                    p={5}
-                    bg="white"
-                    shadow="lg"
-                    rounded="md"
-                >
-                    {/* TODO: add suspense */}
-                    <NotebookView notebook={notebook} />
-                </Box>
-            </main>
-        </>
+        <main>
+            {/* TODO: add suspense */}
+            <NotebookView notebook={notebook} />
+        </main>
     );
 }

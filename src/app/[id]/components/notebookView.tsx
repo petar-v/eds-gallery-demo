@@ -2,74 +2,67 @@
 
 import React, { useRef } from "react";
 
-import DOMPurify from "dompurify";
-import sanitizeHtml, { simpleTransform } from "sanitize-html";
-
-import { IpynbRenderer } from "react-ipynb-renderer";
+import { Flex, Container, Heading, Box } from "@chakra-ui/react";
+import { HamburgerIcon, InfoIcon } from "@chakra-ui/icons";
 
 import Notebook from "@/definitions/Notebook";
 
-import "react-ipynb-renderer/dist/styles/default.css";
 import TableOfContents from "./tableOfContents";
+import ColorfulTag from "@/components/ColorfulTag";
 
-// FIXME: links open on the same tab
-
-const sanitizerDomPurify = (html: string): string => {
-    if (!window) {
-        return "";
-    }
-    const purify = DOMPurify();
-    purify.addHook("afterSanitizeAttributes", function (node) {
-        if (node.tagName === "A") {
-            node.setAttribute("target", "_blank");
-            node.setAttribute("rel", "noreferrer");
-        }
-        return node;
-    });
-
-    return purify.sanitize(html, {
-        // USE_PROFILES: { html: true },
-        FORBID_ATTR: ["style"],
-        ADD_ATTR: ["target"],
-    });
-};
-
-const sanitizerHtml = (html: string): string =>
-    sanitizeHtml(html, {
-        transformTags: {
-            a: simpleTransform("a", {
-                target: "_blank",
-                rel: "noreferrer",
-            }),
-        },
-        allowedAttributes: {},
-    });
-
-const SANITIZER: "sanitize-html" | "dompurify" = "dompurify";
+import Ipynb from "./Ipynb";
 
 export default function NotebookView({ notebook }: { notebook: Notebook }) {
-    const articleRef = useRef<HTMLElement>(null);
+    const notebookRef = useRef<HTMLDivElement>(null);
     return (
-        <>
-            <article ref={articleRef}>
-                <TableOfContents
-                    source={articleRef}
-                    maxDepth={3}
-                    insertIDs={true}
-                />
-                <IpynbRenderer
-                    ipynb={JSON.parse(notebook.data)}
-                    seqAsExecutionCount={true}
-                    syntaxTheme="prism" // or duotoneSpace
-                    htmlFilter={
-                        SANITIZER === "dompurify"
-                            ? sanitizerDomPurify
-                            : sanitizerHtml
-                    }
-                    // FIXME: the opticon tags
-                    // TODO: make the themes switchable
-                />
-            </article>
-        </>
+        <Flex direction={{ base: "column", md: "row" }} maxW="100%" px={4}>
+            <Box
+                flex="0 0 20%"
+                maxW={{ base: "100%", md: "20%" }}
+                mb={5}
+                pt={1}
+            >
+                <Container>
+                    <Heading noOfLines={1} size="sm">
+                        <HamburgerIcon mr={1} />
+                        Contents
+                    </Heading>
+                    <nav>
+                        <TableOfContents
+                            source={notebookRef}
+                            // maxDepth={3}
+                            insertIDs={true}
+                        />
+                    </nav>
+                </Container>
+                <Container>
+                    <Heading noOfLines={1} size="sm">
+                        <InfoIcon mr={1} />
+                        Notebook Information
+                    </Heading>
+                    {notebook.author && (
+                        <Box mb={4} fontSize="sm">
+                            Author: {notebook.author}
+                        </Box>
+                    )}
+                    {notebook.tags.length > 0 && (
+                        <Flex wrap="wrap" direction="row" gap={2}>
+                            {notebook.tags.map((tag, i) => (
+                                <ColorfulTag
+                                    size="md"
+                                    tag={tag}
+                                    key={`tag-${i}`}
+                                />
+                            ))}
+                        </Flex>
+                    )}
+                </Container>
+            </Box>
+            <Box flex="0 1 80%" maxW={{ base: "100%", md: "80%" }} pr={3}>
+                <article>
+                    <Ipynb ref={notebookRef} ipynb={notebook.data} />
+                </article>
+            </Box>
+        </Flex>
     );
 }
