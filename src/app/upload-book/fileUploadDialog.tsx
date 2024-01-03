@@ -84,7 +84,12 @@ export default function FileUploadDialog({
                     <Text>
                         The files you uploaded have been stored successfully and
                         are now in the{" "}
-                        <Link as={NextLink} href="/">
+                        <Link
+                            as={NextLink}
+                            href="/"
+                            textDecoration={"underline"}
+                            isExternal
+                        >
                             Gallery.
                         </Link>
                     </Text>

@@ -1,6 +1,5 @@
 import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
-import { revalidatePath } from "next/cache";
 
 import type { Metadata, ResolvingMetadata } from "next";
 
@@ -61,8 +60,8 @@ export async function generateMetadata(
 const NotebookView = dynamic(() => import("./components/notebookView"), {
     ssr: false,
     loading: () => (
-        <Box alignItems="center" w="full" mt={10}>
-            Loading...
+        <Box alignItems="center" w="100%" p={10}>
+            Loading this notebook, please be patient...
         </Box>
     ), // TODO: create a loading component
 });
@@ -75,10 +74,9 @@ const deleteNotebook: DeleteNotebookFunctionType = async (notebookId) => {
             error: "No valid notebook ID provided.",
         };
     }
-    console.log("Deleted notebook", notebookId);
     try {
         const changedRows = await removeNotebookByID(notebookId);
-        console.log(`Removed new notebook with ID ${notebookId}`);
+        console.log(`Removed notebook with ID ${notebookId}`);
         if (changedRows === 0) {
             return {
                 success: false,

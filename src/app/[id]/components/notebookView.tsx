@@ -188,9 +188,15 @@ export default function NotebookView({
                 error?: string;
             }) => {
                 if (success) {
+                    redirectToGallery();
                     return {
                         title: "This notebook was deleted",
-                        description: `You have successfully deleted this notebook. You will be redirected to the Gallery shortly`,
+                        description: (
+                            <>
+                                You have successfully deleted{" "}
+                                <Text as="b">{notebook.title}</Text>.
+                            </>
+                        ),
                         status: "success",
                         duration: 4000,
                         isClosable: true,
