@@ -2,11 +2,15 @@
 
 This is a demo project to showcase some ideas about the Environmental Data Science book website. This demo has a gallery of uploaded `.ipynb` notebooks such as the ones displayed [here](https://edsbook.org/notebooks/gallery).
 
-When uploading a new notebook, the title and the tags are automatically detected. New tags, as well as an author and a cover image can be added.
+When uploading a new notebook, the title and the tags are automatically detected. New tags, as well as an author and a cover image, can be added.
 
-Those notebooks can be searched in the Gallery view. The notebooks can be opened in the web browser where the contents of the notebook can be viewed. This has an almost fully-featured rendering which can display code blocks, images and other types of data from the Jupyter notebook.
+Those notebooks can be searched in the Gallery view. The notebooks can be opened in the web browser where the contents of the notebook can be viewed. This has an almost fully-featured rendering which can display code blocks, images and other types of data from the Jupyter Notebook.
 
-## Running Locally
+# Demo Video
+
+[Demo video link](https://drive.google.com/file/d/1No8AYOyGmT_n172VfE8OlNziceXKHNtt/view?usp=sharing)
+
+# Running Locally
 
 This is a React & Typescript project based on Next.js and Chakra UI.
 
