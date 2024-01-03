@@ -7,11 +7,9 @@ import {
     Link,
     Box,
     Flex,
-    Text,
     Button,
     Stack,
     useDisclosure,
-    Divider,
     Spacer,
     Icon,
     Image,
@@ -137,7 +135,6 @@ const NavBar = () => {
                     <MenuLinks />
                 </Box>
             </Flex>
-            <Divider w="full" m={0} />
         </>
     );
 };
