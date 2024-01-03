@@ -8,6 +8,7 @@ import { AttachmentIcon } from "@chakra-ui/icons";
 
 import { NotebookMetadata } from "@/definitions/Notebook";
 import NotebooksDisplay from "./notebooksDisplay";
+import { uploadNotebookRoute } from "@/lib/nav";
 
 const EmptyGallery = () => {
     const router = useRouter();
@@ -30,7 +31,7 @@ const EmptyGallery = () => {
                 colorScheme="blue"
                 leftIcon={<AttachmentIcon />}
                 onClick={() => {
-                    router.push("/upload-book");
+                    router.push(uploadNotebookRoute);
                 }}
             >
                 Upload now

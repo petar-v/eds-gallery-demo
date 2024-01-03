@@ -88,6 +88,7 @@ export const getNotebookData = async (id: number): Promise<Notebook | null> => {
 
     if (entry)
         return {
+            id: id,
             ...(entry as Notebook),
             ...notebookEntryToMetadata(entry),
         };

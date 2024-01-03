@@ -1,6 +1,9 @@
-import { NotebookMetadata } from "@/definitions/Notebook";
 import { Route } from "next";
+import { revalidatePath } from "next/cache";
+
 import { convert as slugify } from "url-slug";
+
+import { NotebookMetadata } from "@/definitions/Notebook";
 
 const MAX_SLUGS = 7;
 const SLUG_SEPARATOR = "-";
@@ -20,3 +23,9 @@ export const notebookToUrl = ({ id, title }: NotebookMetadata): Route => {
     }
     return `/${id}/${slug(title)}` as Route;
 };
+
+export const galleryRoute: Route = `/`;
+
+export const uploadNotebookRoute: Route = "/upload-book";
+
+export const purgeNotebookRouteCache = () => revalidatePath(galleryRoute);
