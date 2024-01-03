@@ -5,6 +5,7 @@ import { Providers } from "./providers";
 import "@/styles/globals.scss";
 
 import React from "react";
+import NavBar from "./components/header";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,7 +24,7 @@ export default function RootLayout({
         <html lang="en">
             <body className={inter.className}>
                 <Providers>
-                    {/* TODO: add header with some navigation */}
+                    <NavBar />
                     {children}
                     {/* TODO: add a footer with some branding */}
                     {/* <footer>Created by Petar Vasilev</footer> */}

@@ -88,7 +88,6 @@ export default function FileUploadDialog({
                             as={NextLink}
                             href="/"
                             textDecoration={"underline"}
-                            isExternal
                         >
                             Gallery.
                         </Link>
