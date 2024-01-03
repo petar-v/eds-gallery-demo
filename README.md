@@ -1,6 +1,6 @@
 # Intro
 
-This is a demo project to showcase some ideas about the Environmental Data Science book website. This demo has a gallery of uploaded `.ipynb` notebooks such as the ones displayed [here](https://edsbook.org/notebooks/gallery).
+This is a demo project to showcase some ideas about the [Environmental Data Science book website](https://edsbook.org/). This demo has a gallery of uploaded `.ipynb` notebooks such as the ones displayed [here](https://edsbook.org/notebooks/gallery).
 
 When uploading a new notebook, the title and the tags are automatically detected. New tags, as well as an author and a cover image, can be added.
 
