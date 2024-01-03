@@ -24,9 +24,10 @@ export default function RootLayout({
         <html lang="en">
             <body className={inter.className}>
                 <Providers>
-                    <NavBar />
+                    <nav>
+                        <NavBar />
+                    </nav>
                     {children}
-                    {/* TODO: add a footer with some branding */}
                     {/* <footer>Created by Petar Vasilev</footer> */}
                 </Providers>
             </body>

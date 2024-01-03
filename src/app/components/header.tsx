@@ -18,8 +18,8 @@ import {
     IconProps,
 } from "@chakra-ui/react";
 import { Route } from "next";
-import { SmallCloseIcon, HamburgerIcon } from "@chakra-ui/icons";
-import { galleryRoute, uploadNotebookRoute } from "@/lib/nav";
+import { CloseIcon, HamburgerIcon } from "@chakra-ui/icons";
+import { galleryRoute, getInTouch, uploadNotebookRoute } from "@/lib/nav";
 
 const MenuToggle = ({
     toggle,
@@ -30,7 +30,7 @@ const MenuToggle = ({
 }) => {
     return (
         <Box display={{ base: "block", md: "none" }} onClick={toggle}>
-            {isOpen ? <SmallCloseIcon /> : <HamburgerIcon />}
+            {isOpen ? <CloseIcon /> : <HamburgerIcon />}
         </Box>
     );
 };
@@ -56,7 +56,7 @@ const MenuItem = ({
         return (
             <Link href={to}>
                 <Button
-                    color={["primary.500", "primary.500", "white", "white"]}
+                    color={["white", "white", "white", "white"]}
                     bg={["white", "white", "primary.500", "primary.500"]}
                     _hover={{
                         bg: [
@@ -78,7 +78,6 @@ const MenuItem = ({
     return (
         <Link href={to}>
             <Button
-                // textDecoration={isOpen ? "underline" : undefined}
                 colorScheme={isOpen ? "gray" : "primary"}
                 rightIcon={isOpen ? <CircleIcon /> : undefined}
                 variant="link"
@@ -100,10 +99,7 @@ const MenuLinks = () => {
         >
             <MenuItem to={galleryRoute}>Gallery</MenuItem>
             <MenuItem to={uploadNotebookRoute}>Upload a notebook</MenuItem>
-            <MenuItem
-                to="mailto:petar@flutterbit.com?subject=EDS%20Book"
-                isPrimary
-            >
+            <MenuItem to={getInTouch} isPrimary>
                 Get in touch!
             </MenuItem>
         </Stack>
@@ -123,13 +119,6 @@ const NavBar = () => {
                 w="full"
                 px={4}
                 py={2}
-                color={["white", "white", "gray.900", "gray.900"]}
-                bg={[
-                    "primary.500",
-                    "primary.500",
-                    "transparent",
-                    "transparent",
-                ]}
             >
                 <Link href={galleryRoute}>
                     <Image

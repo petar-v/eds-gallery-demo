@@ -26,7 +26,7 @@ const EmptyGallery = () => (
             alt="No notebooks here."
             src="/no-results.svg"
         />
-        <Heading>Oh no! No Notebooks here yet...</Heading>
+        <Heading>Oh no! No notebooks here yet...</Heading>
         <Text>
             There are no EDS Jupyter notebooks around. Luckily you can fix that
             by uploading some!
