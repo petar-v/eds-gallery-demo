@@ -1,26 +1,75 @@
 "use client";
 
-import React, { RefObject, useRef } from "react";
+import React, { RefObject, useRef, PropsWithChildren } from "react";
 
-import { Flex, Container, Heading, Box } from "@chakra-ui/react";
-import { HamburgerIcon, InfoIcon } from "@chakra-ui/icons";
+import {
+    Flex,
+    Container,
+    Heading,
+    Box,
+    Button,
+    StackDivider,
+    VStack,
+} from "@chakra-ui/react";
+import {
+    HamburgerIcon,
+    InfoIcon,
+    DeleteIcon,
+    SettingsIcon,
+} from "@chakra-ui/icons";
 
-import Notebook from "@/definitions/Notebook";
+import Notebook, { NotebookMetadata } from "@/definitions/Notebook";
 
 import TableOfContents from "./tableOfContents";
 import ColorfulTag from "@/components/ColorfulTag";
 
 import Ipynb from "./Ipynb";
 
+export type DeleteNotebookFunctionType = (
+    notebook: NotebookMetadata,
+) => Promise<{ success: boolean; error?: string }>;
+
+const NotebookDeleteButton = ({
+    notebook,
+    deleteNotebook,
+    children,
+}: PropsWithChildren & {
+    notebook: Notebook;
+    deleteNotebook: DeleteNotebookFunctionType;
+}) => {
+    return (
+        <Button
+            w="full"
+            colorScheme="red"
+            leftIcon={<DeleteIcon />}
+            onClick={() => {
+                deleteNotebook(notebook)
+                    .then(({ success }) => {
+                        alert(success);
+                    })
+                    .catch((error) => {
+                        alert(error.message);
+                    });
+            }}
+        >
+            {children}
+        </Button>
+    );
+};
+
 const NotebookActions = ({
     notebook,
     notebookRef,
+    deleteNotebook,
 }: {
     notebook: Notebook;
     notebookRef: RefObject<HTMLElement>;
+    deleteNotebook: DeleteNotebookFunctionType;
 }) => {
+    const divider = <StackDivider borderColor="gray.200" />;
     return (
-        <>
+        <VStack align="stretch" divider={divider} spacing={4}>
+            {divider}
             <Container>
                 <Heading noOfLines={1} size="sm">
                     <HamburgerIcon mr={1} />
@@ -52,11 +101,29 @@ const NotebookActions = ({
                     </Flex>
                 )}
             </Container>
-        </>
+            <Container>
+                {/* <Heading noOfLines={1} size="sm">
+                    <SettingsIcon mr={1} />
+                    Notebook Actions
+                </Heading> */}
+                <NotebookDeleteButton
+                    deleteNotebook={deleteNotebook}
+                    notebook={notebook}
+                >
+                    Delete Notebook
+                </NotebookDeleteButton>
+            </Container>
+        </VStack>
     );
 };
 
-export default function NotebookView({ notebook }: { notebook: Notebook }) {
+export default function NotebookView({
+    notebook,
+    deleteNotebook,
+}: {
+    notebook: Notebook;
+    deleteNotebook: DeleteNotebookFunctionType;
+}) {
     const notebookRef = useRef<HTMLDivElement>(null);
 
     return (
@@ -71,6 +138,7 @@ export default function NotebookView({ notebook }: { notebook: Notebook }) {
                 <NotebookActions
                     notebook={notebook}
                     notebookRef={notebookRef}
+                    deleteNotebook={deleteNotebook}
                 />
             </Box>
             <Box flex="0 1 80%" maxW={{ base: "100%", md: "80%" }} pr={3}>

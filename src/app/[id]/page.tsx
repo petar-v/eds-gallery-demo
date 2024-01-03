@@ -1,11 +1,13 @@
+import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 
 import type { Metadata, ResolvingMetadata } from "next";
 
 import { getNotebookData, getNotebookMetaData } from "@/lib/storage";
-import dynamic from "next/dynamic";
 
-// import NotebookView from "./components/notebookView";
+import { removeNotebook } from "@/lib/storage";
+import { NotebookMetadata } from "@/definitions/Notebook";
+import { DeleteNotebookFunctionType } from "./components/notebookView";
 
 type Props = {
     params: { id: number };
@@ -56,8 +58,37 @@ const NotebookView = dynamic(() => import("./components/notebookView"), {
     loading: () => <>LOADING...</>, // TODO: create a loading component
 });
 
+const deleteNotebook: DeleteNotebookFunctionType = async (notebook) => {
+    "use server";
+
+    console.log("Deleted notebook", notebook.id);
+
+    return new Promise((resolve) => {
+        resolve({
+            success: true,
+        });
+    });
+    // try {
+    //     const changedRows = await removeNotebook(notebook);
+    //     console.log(`Removed new notebook with ID ${notebook.id}`);
+    //     if (changedRows === 0) {
+    //         return {
+    //             success: false,
+    //             error: "It seems that this notebook has not been deleted. Maybe someone else has deleted it already?",
+    //         };
+    //     }
+    //     return { success: true };
+    // } catch (err) {
+    //     return {
+    //         success: false,
+    //         error: "The notebook could not be saved to the database.",
+    //     };
+    // }
+};
+
 export default async function Page({ params: { id } }: Props) {
     const notebook = await getNotebookData(id);
+
     if (!notebook) {
         return notFound();
     }
@@ -65,7 +96,7 @@ export default async function Page({ params: { id } }: Props) {
     return (
         <main>
             {/* TODO: add suspense */}
-            <NotebookView notebook={notebook} />
+            <NotebookView notebook={notebook} deleteNotebook={deleteNotebook} />
         </main>
     );
 }

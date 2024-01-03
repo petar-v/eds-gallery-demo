@@ -17,12 +17,14 @@ import { parseFileEncodedNotebook } from "@/lib/notebooks";
 import SuccessMessage from "./components/successMessage";
 import { notebookToUrl } from "@/lib/nav";
 
+export type UploadFunctionType = (
+    notebook: Notebook,
+) => Promise<{ success: boolean; error?: string; id?: number }>;
+
 export default function FileUploadDialog({
     upload,
 }: {
-    upload: (
-        notebook: Notebook,
-    ) => Promise<{ success: boolean; error?: string; id?: number }>;
+    upload: UploadFunctionType;
 }) {
     const [notebook, setNotebook] = useState<Notebook>();
     const [isLoading, setIsLoading] = useState(false);
