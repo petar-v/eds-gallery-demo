@@ -66,7 +66,7 @@ export default function FileUploadDialog({
     }
     if (success) {
         const extraButtons = notebook?.id && (
-            <NextLink href={notebookToUrl(notebook)} passHref>
+            <NextLink href={notebookToUrl(notebook)}>
                 <Button
                     w="100%"
                     colorScheme="teal"
