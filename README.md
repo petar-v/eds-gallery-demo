@@ -1,16 +1,16 @@
-# Next.js started
+# Intro
 
-This is Petar's Next.js starter. Just clone this and rock'n'roll.
+This is a demo project to showcase some ideas about the Environmental Data Science book website. This demo has a gallery of uploaded `.ipynb` notebooks such as the ones displayed [here](https://edsbook.org/notebooks/gallery).
 
-It has iron session, tailwind, redux, linting and instrumentation and etc.
+When uploading a new notebook, the title and the tags are automatically detected. New tags, as well as an author and a cover image can be added.
 
-## Next.js
+Those notebooks can be searched in the Gallery view. The notebooks can be opened in the web browser where the contents of the notebook can be viewed. This has an almost fully-featured rendering which can display code blocks, images and other types of data from the Jupyter notebook.
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## Running Locally
 
-## Getting Started
+This is a React & Typescript project based on Next.js and Chakra UI.
 
-First, run the development server:
+You can run the development server:
 
 ```bash
 yarn dev
@@ -18,6 +18,12 @@ yarn dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# Screen shots
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+![Alt text](screenshots/upload.png)
+![Alt text](screenshots/notebook.png)
+![Alt text](screenshots/gallery.png)
+
+# License
+
+This project is created as a demo for [the EDS project](https://edsbook.org/) and is intended for use only by the authorized parties and the author.
