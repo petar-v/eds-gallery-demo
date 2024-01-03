@@ -4,6 +4,7 @@ import { Box, Heading } from "@chakra-ui/react";
 import FileUploadDialog, { UploadFunctionType } from "./fileUploadDialog";
 
 import { addNotebook } from "@/lib/storage";
+import { purgeNotebookRouteCache } from "@/lib/nav";
 
 export const metadata: Metadata = {
     title: "Upload a new EDS Book",
@@ -15,6 +16,10 @@ const upload: UploadFunctionType = async (notebook) => {
     try {
         const id = await addNotebook(notebook);
         console.log(`Added a new notebook with ID ${id}`);
+
+        // purge cache in gallery so the new notebook will appear
+        purgeNotebookRouteCache();
+
         return { success: true, id };
     } catch (err) {
         return {

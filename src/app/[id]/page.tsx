@@ -1,5 +1,6 @@
 import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 import type { Metadata, ResolvingMetadata } from "next";
 
@@ -11,6 +12,7 @@ import {
 
 import { DeleteNotebookFunctionType } from "./components/notebookView";
 import { Box } from "@chakra-ui/react";
+import { purgeNotebookRouteCache } from "@/lib/nav";
 
 type Props = {
     params: { id: number };
@@ -83,6 +85,8 @@ const deleteNotebook: DeleteNotebookFunctionType = async (notebookId) => {
                 error: "It seems that this notebook has not been deleted. Maybe someone else has deleted it already?",
             };
         }
+        // purge cache in gallery so the notebook will not appear
+        purgeNotebookRouteCache();
         return { success: true };
     } catch (err) {
         return {
