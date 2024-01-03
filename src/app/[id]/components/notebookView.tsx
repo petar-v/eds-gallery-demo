@@ -1,62 +1,83 @@
 "use client";
 
-import React from "react";
+import React, { RefObject, useRef } from "react";
 
-import DOMPurify from "dompurify";
-import sanitizeHtml from "sanitize-html";
-
-import { IpynbRenderer } from "react-ipynb-renderer";
+import { Flex, Container, Heading, Box } from "@chakra-ui/react";
+import { HamburgerIcon, InfoIcon } from "@chakra-ui/icons";
 
 import Notebook from "@/definitions/Notebook";
 
-import "react-ipynb-renderer/dist/styles/default.css";
+import TableOfContents from "./tableOfContents";
+import ColorfulTag from "@/components/ColorfulTag";
 
-// FIXME: links open on the same tab
+import Ipynb from "./Ipynb";
 
-const sanitizerDomPurify = (html: string): string => {
-    if (!window) {
-        return "";
-    }
-    const purify = DOMPurify();
-    purify.addHook("afterSanitizeAttributes", function (node) {
-        if (node.tagName === "A") {
-            node.setAttribute("target", "_blank");
-            node.setAttribute("rel", "noreferrer");
-        }
-        return node;
-    });
-
-    return purify.sanitize(html, {
-        // USE_PROFILES: { html: true },
-        FORBID_ATTR: ["style"],
-        ADD_ATTR: ["target"],
-    });
+const NotebookActions = ({
+    notebook,
+    notebookRef,
+}: {
+    notebook: Notebook;
+    notebookRef: RefObject<HTMLElement>;
+}) => {
+    return (
+        <>
+            <Container>
+                <Heading noOfLines={1} size="sm">
+                    <HamburgerIcon mr={1} />
+                    Contents
+                </Heading>
+                <nav>
+                    <TableOfContents
+                        source={notebookRef}
+                        // maxDepth={3}
+                        insertIDs={true}
+                    />
+                </nav>
+            </Container>
+            <Container>
+                <Heading noOfLines={1} size="sm">
+                    <InfoIcon mr={1} />
+                    Notebook Information
+                </Heading>
+                {notebook.author && (
+                    <Box mb={4} fontSize="sm">
+                        Author: {notebook.author}
+                    </Box>
+                )}
+                {notebook.tags.length > 0 && (
+                    <Flex wrap="wrap" direction="row" gap={2}>
+                        {notebook.tags.map((tag, i) => (
+                            <ColorfulTag size="md" tag={tag} key={`tag-${i}`} />
+                        ))}
+                    </Flex>
+                )}
+            </Container>
+        </>
+    );
 };
-
-const sanitizerHtml = (html: string): string => {
-    return sanitizeHtml(html, {
-        transformTags: {
-            a: sanitizeHtml.simpleTransform("a", {
-                target: "_blank",
-                rel: "noreferrer",
-            }),
-        },
-        allowedAttributes: {},
-    });
-};
-
-const SANITIZER: "sanitize-html" | "dompurify" = "dompurify";
 
 export default function NotebookView({ notebook }: { notebook: Notebook }) {
+    const notebookRef = useRef<HTMLDivElement>(null);
+
     return (
-        <IpynbRenderer
-            ipynb={JSON.parse(notebook.data)}
-            seqAsExecutionCount={true}
-            syntaxTheme="prism" // or duotoneSpace
-            htmlFilter={
-                SANITIZER === "dompurify" ? sanitizerDomPurify : sanitizerHtml
-            }
-            // TODO: make the themes switchable
-        />
+        <Flex direction={{ base: "column", md: "row" }} maxW="100%" px={4}>
+            <Box
+                flex="0 0 20%"
+                maxW={{ base: "100%", md: "20%" }}
+                mb={5}
+                pt={1}
+            >
+                {/* TODO: hide sidebar when md or smaller */}
+                <NotebookActions
+                    notebook={notebook}
+                    notebookRef={notebookRef}
+                />
+            </Box>
+            <Box flex="0 1 80%" maxW={{ base: "100%", md: "80%" }} pr={3}>
+                <article>
+                    <Ipynb ref={notebookRef} ipynb={notebook.data} />
+                </article>
+            </Box>
+        </Flex>
     );
 }

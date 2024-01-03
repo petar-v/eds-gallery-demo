@@ -55,13 +55,7 @@ const SearchBar = ({
 
     return (
         <Box w="full" bg="white" rounded="md">
-            <Tooltip
-                color="gray.900"
-                bg="gray.200"
-                closeDelay={1000}
-                hasArrow
-                label={tooltip}
-            >
+            <Tooltip color="gray.900" bg="gray.200" hasArrow label={tooltip}>
                 <InputGroup size="md">
                     <InputLeftElement pointerEvents="none">
                         <Search2Icon color="gray.300" />
@@ -136,7 +130,7 @@ const NotebooksDisplay = ({ notebooks }: { notebooks: NotebookMetadata[] }) => {
             query.length === 0
                 ? notebooks
                 : (searcher.current && searcher.current(query)) || [],
-        [query],
+        [notebooks, query],
     );
 
     return (

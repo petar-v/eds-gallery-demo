@@ -11,7 +11,6 @@ const nextConfig = {
         webpackBuildWorker: true,
         instrumentationHook: true,
         typedRoutes: true,
-        newNextLinkBehavior: true,
         serverActions: {
             bodySizeLimit: "15mb",
         },
