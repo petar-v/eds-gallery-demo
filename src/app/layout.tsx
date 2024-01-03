@@ -5,6 +5,9 @@ import { Providers } from "./providers";
 import "@/styles/globals.scss";
 
 import React from "react";
+import NavBar from "./components/header";
+import Footer from "./components/footer";
+import { Box, CSSReset, Flex, Spacer } from "@chakra-ui/react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,10 +26,17 @@ export default function RootLayout({
         <html lang="en">
             <body className={inter.className}>
                 <Providers>
-                    {/* TODO: add header with some navigation */}
-                    {children}
-                    {/* TODO: add a footer with some branding */}
-                    {/* <footer>Created by Petar Vasilev</footer> */}
+                    <CSSReset />
+                    <Flex direction="column" h="100vh">
+                        <Box flex="none">
+                            <NavBar />
+                        </Box>
+
+                        <Box flex="1 0 auto">{children}</Box>
+                        <Box flex="none">
+                            <Footer />
+                        </Box>
+                    </Flex>
                 </Providers>
             </body>
         </html>

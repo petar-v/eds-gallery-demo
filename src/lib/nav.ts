@@ -28,4 +28,7 @@ export const galleryRoute: Route = `/`;
 
 export const uploadNotebookRoute: Route = "/upload-book";
 
+export const getInTouch: Route =
+    "mailto:petar@flutterbit.com?subject=EDS%20Book";
+
 export const purgeNotebookRouteCache = () => revalidatePath(galleryRoute);
