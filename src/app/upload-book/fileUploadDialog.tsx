@@ -149,7 +149,7 @@ export default function FileUploadDialog({
                         // TODO: try parsing the files one by one until we find a proper jupyter notebook
                         parseFileEncodedNotebook(uploadedFile.data || "")
                             .then(setNotebook)
-                            .catch((error) => {
+                            .catch(() => {
                                 toastErrorMessage({
                                     title: "Unrecognized file type.",
                                     description: `The file ${uploadedFile.name} is not a Jupyter Notebook or something we can handle.`,

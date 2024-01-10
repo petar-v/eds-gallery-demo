@@ -1,3 +1,5 @@
+import React from "react";
+
 import { Controller, Control, FieldValues, Path } from "react-hook-form";
 import {
     AutoComplete,
@@ -18,7 +20,7 @@ export default function TagInput<T extends FieldValues>({
     control,
     name,
 }: {
-    control: Control<T, any>;
+    control: Control<T>;
     name: Path<T>;
 }) {
     return (
@@ -40,8 +42,8 @@ export default function TagInput<T extends FieldValues>({
                             tags.map((tag, tid) => (
                                 <AutoCompleteTag
                                     key={`option-aci-${tid}`}
-                                    label={tag.label}
-                                    colorScheme={tagColor(tag.label)}
+                                    label={tag.label as string}
+                                    colorScheme={tagColor(tag.label as string)}
                                     onRemove={tag.onRemove}
                                 />
                             ))

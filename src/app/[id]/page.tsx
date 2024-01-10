@@ -1,7 +1,9 @@
+import React from "react";
+
 import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 
-import type { Metadata, ResolvingMetadata } from "next";
+import type { Metadata } from "next";
 
 import {
     getNotebookData,
@@ -17,23 +19,13 @@ type Props = {
     params: { id: number };
 };
 
-export async function generateMetadata(
-    { params }: Props,
-    parent: ResolvingMetadata,
-): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // read route params
     const id = params.id;
     // TODO: do some sort of caching here
     const notebook = await getNotebookMetaData(id);
 
     if (!notebook) return {};
-
-    const resolvedParent = await parent;
-
-    // optionally access and extend (rather than replace) parent metadata
-    const previousImages = resolvedParent.openGraph?.images || [];
-    const images = notebook.image ? [notebook.image, ...previousImages] : [];
-    // TODO: make an endpoint for the images.
 
     const title = notebook.title;
     const description = `${notebook.title} by ${notebook.author}`;
@@ -48,11 +40,9 @@ export async function generateMetadata(
         description,
         authors,
         keywords: notebook.tags,
-        // metadataBase: resolvedParent.metadataBase,
         openGraph: {
             title,
             description,
-            // images,
         },
     };
 }

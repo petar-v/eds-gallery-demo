@@ -1,5 +1,5 @@
 import { NotebookMetadata } from "@/definitions/Notebook";
-import Fuse, { Expression } from "fuse.js";
+import Fuse from "fuse.js";
 
 const fuseOptions = {
     // includeScore: false,

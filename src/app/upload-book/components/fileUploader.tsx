@@ -126,7 +126,7 @@ async function readAllDirectoryEntries(
     directoryReader: FileSystemDirectoryReader,
 ) {
     const entries = [];
-    let readEntries: any = await readEntriesPromise(directoryReader);
+    let readEntries = await readEntriesPromise(directoryReader);
 
     while (readEntries.length > 0) {
         entries.push(...readEntries);
@@ -137,15 +137,12 @@ async function readAllDirectoryEntries(
 }
 
 // Wrap readEntries in a promise to make working with readEntries easier
-async function readEntriesPromise(directoryReader: FileSystemDirectoryReader) {
-    try {
-        return await new Promise((resolve, reject) => {
-            directoryReader.readEntries(resolve, reject);
-        });
-    } catch (err) {
-        console.error(err);
-    }
-}
+const readEntriesPromise = async (directoryReader: FileSystemDirectoryReader) =>
+    new Promise<FileSystemEntry[]>((resolve, reject) => {
+        directoryReader.readEntries((entries: FileSystemEntry[]) => {
+            resolve(entries);
+        }, reject);
+    });
 
 function formatFileSize(bytes: number) {
     if (bytes >= 1000000000000) {

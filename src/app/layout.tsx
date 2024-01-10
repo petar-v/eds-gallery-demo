@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Providers } from "./providers";
-
-import "@/styles/globals.scss";
+import Providers from "./providers";
 
 import React from "react";
 import NavBar from "./components/header";
 import Footer from "./components/footer";
-import { Box, CSSReset, Flex, Spacer } from "@chakra-ui/react";
+import { Box, CSSReset, Flex } from "@chakra-ui/react";
 
 const inter = Inter({ subsets: ["latin"] });
 

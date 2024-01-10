@@ -1,3 +1,5 @@
+import React from "react";
+
 import { Tag } from "@chakra-ui/react";
 
 const colors = [

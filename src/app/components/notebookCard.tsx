@@ -13,10 +13,10 @@ import {
     LinkBox,
     LinkOverlay,
     Highlight,
+    CardFooter,
 } from "@chakra-ui/react";
 
 import { NotebookMetadata } from "@/definitions/Notebook";
-import { CardFooter } from "react-bootstrap";
 import ColorfulTag from "@/components/ColorfulTag";
 import { notebookToUrl } from "@/lib/nav";
 

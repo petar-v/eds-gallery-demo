@@ -1,4 +1,4 @@
-import React, { useEffect, RefObject, useState, createRef } from "react";
+import React, { useEffect, RefObject, useState } from "react";
 
 import { nanoid } from "nanoid";
 import { slug } from "@/lib/nav";

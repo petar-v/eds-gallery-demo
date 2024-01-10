@@ -47,7 +47,7 @@ const MenuItem = ({
     isPrimary,
     to = galleryRoute,
 }: PropsWithChildren & { to: Route; isPrimary?: boolean }) => {
-    const path = usePathname() as Route;
+    const path = usePathname();
     const isOpen = path == to;
 
     if (isPrimary) {

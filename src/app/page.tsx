@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import React from "react";
+
 import { Suspense } from "react";
 
 import Gallery from "./components/gallery";

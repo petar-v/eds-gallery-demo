@@ -10,7 +10,7 @@ import DOMPurify from "dompurify";
 
 import "katex/dist/katex.min.css";
 import "react-ipynb-renderer/dist/styles/default.css";
-import { IpynbRenderer } from "react-ipynb-renderer";
+import { IpynbRenderer, IpynbType } from "react-ipynb-renderer";
 
 // FIXME: links open on the same tab
 const sanitizerDomPurify = (html: string): string => {
@@ -57,11 +57,13 @@ const Ipynb = forwardRef(function IpynbRendererClientWrapped(
         rendered.style.overflowX = "hidden";
         rendered.classList.remove("container"); // Holy F&*K why does this have so many media tags?!?!
     }, []);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const parsedIpynb: IpynbType = JSON.parse(ipynb);
     return (
         <div ref={innerRef}>
             <IpynbRenderer
                 language="python"
-                ipynb={JSON.parse(ipynb)}
+                ipynb={parsedIpynb}
                 seqAsExecutionCount={true}
                 syntaxTheme="prism" // or duotoneSpace
                 htmlFilter={sanitizerDomPurify}

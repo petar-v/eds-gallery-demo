@@ -1,3 +1,5 @@
+import React from "react";
+
 import { Metadata } from "next";
 
 import { Box, Heading } from "@chakra-ui/react";
