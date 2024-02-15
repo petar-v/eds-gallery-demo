@@ -15,28 +15,23 @@ export const metadata: Metadata = {
         "Environmental Data Science book or EDS book is a living, open and community-driven online resource to showcase and support the publication of data, research and open-source tools for collaborative, reproducible and transparent Environmental Data Science.",
 };
 
-export default function RootLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
-    return (
-        <html lang="en">
-            <body className={inter.className}>
-                <Providers>
-                    <CSSReset />
-                    <Flex direction="column" h="100vh">
-                        <Box flex="none">
-                            <NavBar />
-                        </Box>
+const RootLayout = ({ children }: { children: React.ReactNode }) => (
+    <html lang="en">
+        <body className={inter.className}>
+            <Providers>
+                <CSSReset />
+                <Flex direction="column" h="100vh">
+                    <Box flex="none">
+                        <NavBar />
+                    </Box>
+                    <Box flex="1 0 auto">{children}</Box>
+                    <Box flex="none">
+                        <Footer />
+                    </Box>
+                </Flex>
+            </Providers>
+        </body>
+    </html>
+);
 
-                        <Box flex="1 0 auto">{children}</Box>
-                        <Box flex="none">
-                            <Footer />
-                        </Box>
-                    </Flex>
-                </Providers>
-            </body>
-        </html>
-    );
-}
+export default RootLayout;

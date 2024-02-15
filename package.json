@@ -56,7 +56,8 @@
         "md5": "^2.3.0",
         "migration-files": "^0.4.1",
         "nanoid": "^5.0.4",
-        "next": "^14.0.0",
+        "next": "13.4.3",
+        "nextjs": "^0.0.3",
         "nextjs-routes": "^2.1.0",
         "notebookjs": "^0.6.7",
         "path": "^0.12.7",
@@ -99,7 +100,7 @@
         "stylelint-config-standard-scss": "^13.0.0",
         "stylelint-prettier": "^5.0.0",
         "typescript": "^5.3.3",
-        "vercel": "^33.0.2",
+        "vercel": "^33.1.0",
         "webpack": "^5.89.0"
     },
     "engines": {

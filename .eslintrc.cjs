@@ -16,5 +16,8 @@ module.exports = {
         "chakra-ui/props-order": 2,
         "chakra-ui/props-shorthand": 2,
         "chakra-ui/require-specific-component": 2,
+        "@typescript-eslint/no-unsafe-argument": 0,
+        "@typescript-eslint/no-unsafe-member-access": 0,
+        "@typescript-eslint/no-unsafe-call": 0,
     },
 };

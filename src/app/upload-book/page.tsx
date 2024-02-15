@@ -31,24 +31,17 @@ const upload: UploadFunctionType = async (notebook) => {
     }
 };
 
-export default function Page() {
-    return (
-        <>
-            <header>
-                <Heading>Upload a Jupyter Notebook</Heading>
-            </header>
-            <main>
-                <Box
-                    w="full"
-                    maxW="lg"
-                    p={5}
-                    bg="white"
-                    shadow="lg"
-                    rounded="md"
-                >
-                    <FileUploadDialog upload={upload} />
-                </Box>
-            </main>
-        </>
-    );
-}
+const Page = () => (
+    <>
+        <header>
+            <Heading>Upload a Jupyter Notebook</Heading>
+        </header>
+        <main>
+            <Box w="full" maxW="lg" p={5} bg="white" shadow="lg" rounded="md">
+                <FileUploadDialog upload={upload} />
+            </Box>
+        </main>
+    </>
+);
+
+export default Page;

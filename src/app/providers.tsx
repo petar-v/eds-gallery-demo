@@ -7,10 +7,10 @@ import { CacheProvider } from "@chakra-ui/next-js";
 
 import DefaultTheme from "@/themes/default";
 
-export default function Providers({ children }: { children: React.ReactNode }) {
-    return (
-        <CacheProvider>
-            <ChakraProvider theme={DefaultTheme}>{children}</ChakraProvider>
-        </CacheProvider>
-    );
-}
+const Providers = ({ children }: { children: React.ReactNode }) => (
+    <CacheProvider>
+        <ChakraProvider theme={DefaultTheme}>{children}</ChakraProvider>
+    </CacheProvider>
+);
+
+export default Providers;

@@ -7,6 +7,19 @@ const withRoutes = nextRoutes({
 
 const nextConfig = {
     reactStrictMode: true,
+    output: "standalone",
+    compress: false,
+    compiler: {
+        emotion: true,
+        removeConsole: process.env.NODE_ENV === "production" && {
+            exclude: ["error"],
+        },
+    },
+    typescript: {
+        // !! WARN !!
+        // Dangerously allow production builds to compile - this is due to some build issues with next.js 14.
+        ignoreBuildErrors: true,
+    },
     experimental: {
         webpackBuildWorker: true,
         instrumentationHook: true,
@@ -15,6 +28,7 @@ const nextConfig = {
             bodySizeLimit: "15mb",
         },
     },
+
     sassOptions: {
         includePaths: [path.join(__dirname, "styles")],
     },
@@ -35,6 +49,10 @@ const nextConfig = {
             "better-sqlite3": "commonjs better-sqlite3",
         };
 
+        config.optimization = {
+            minimize: false,
+        };
+
         if (isServer) {
             config.resolve.fallback = {
                 fs: false,
@@ -43,9 +61,6 @@ const nextConfig = {
 
         return config;
     },
-    // to speed up building
-    optimizeFonts: false, // Disable font optimization
-    swcMinify: true,
 };
 
 module.exports = withRoutes(nextConfig);
